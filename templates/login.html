@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Pscion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/normalize.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/foundation.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='app/css/login.css') }}" />
+</head>
+<body>
+<div id="wrapper">
+    <div id="logo">
+        <img src="{{ url_for('static', filename='app/img/pscion.png') }}" alt="Pscion" />
+    </div>
+    <div id="sidebar">
+        {% include "parts/login-login.html" %}
+    </div>
+</div>
+<script src="//www.youtube.com/iframe_api"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/foundation/js/foundation.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery-md5/jquery.md5.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/jquery-tubular.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='app/js/login.js') }}"></script>
+</body>
+</html>
