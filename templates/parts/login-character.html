@@ -2,11 +2,17 @@
     <div class="row column character-form">
         <h4 class="text-center">Register - Character</h4>
         <label>Character Name
-            <input type="text" placeholder="Character Name">
+            <input type="text" name="name" placeholder="Character Name">
         </label>
         <label>Character Class
-            <input type="text" placeholder="Character Class">
+            <select name="class">
+                {% for class in classes %}
+                    <option value="{{ class.pid }}">{{ class.name }} - {{ class.description }}</option>
+                {% endfor %}
+            </select>
         </label>
+        <input type="hidden" name="user" value="{{ user.pid }}" />
+        <input type="hidden" name="key" value="{{ user.sesskey }}" />
         <p style="margin-bottom: 0px;">
             <a type="submit" class="button expanded">Finish Registration</a>
         </p>

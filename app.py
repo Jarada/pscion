@@ -14,7 +14,8 @@ self explanatory but I've added comments where I feel they'll benefit.
 """
 
 from flask import Flask, abort, render_template, request
-from game.model import user
+from game.model import user, cclass
+import uuid
 
 app = Flask(__name__)
 
@@ -41,18 +42,35 @@ def register_temp():
 def register():
     # Register User
     name = request.form['username']
-    print(name)
     query = user.User.select().where(user.User.username == name)
-    print(query)
     if query:
+        # If User exists, abort! They can login.
         return abort(403)
     password = request.form['password']
-    print(password)
-    query = user.User.create(username=name, password=password)
-    print(query)
+    # We create the user with a sesskey; a unique identifier that is used to identify the user
+    # in the registration process from here on out
+    query = user.User.create(username=name, password=password, sesskey=uuid.uuid4())
     if query:
-        return render_template("parts/login-character.html"), 201
+        # We return the next part of the registration process with the user, and all available
+        # classes to choose from
+        classes = cclass.CharacterClass.select().where(cclass.CharacterClass.primary == True)
+        return render_template("parts/login-character.html", user=query, classes=classes), 201
     return abort(500)
+
+
+@app.route('/q/registerfin', methods=['POST'])
+def register_fin():
+    # Complete Registration of User
+    try:
+        # Let's try to save the User
+        query = user.User.get(user.User.pid == request.form['user'])
+        query.character = request.form['name']
+        query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['class'])
+        query.save()
+
+        # Alright we're good! Let's login!
+    except:
+        return abort(500)
 
 
 if __name__ == '__main__':

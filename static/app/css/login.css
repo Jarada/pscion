@@ -7,7 +7,6 @@ html, body {
     min-height: 100%;
     width: 960px;
     margin: 0 auto;
-    padding: 48px 0 72px;
 }
 
 #logo {
@@ -26,6 +25,7 @@ html, body {
     -moz-border-radius: 15px;
     border-radius: 15px;
     display: none;
+    margin-top: 48px;
 }
 
 .text-center a {

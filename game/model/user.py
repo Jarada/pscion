@@ -17,8 +17,9 @@ class User(database.BaseModel):
     pid = PrimaryKeyField(primary_key=True)
     username = TextField(unique=True)
     password = TextField()
+    sesskey = TextField()
     character = TextField(null=True)
-    #charclass = ForeignKeyField(cclass.CharacterClass)
+    charclass = ForeignKeyField(cclass.CharacterClass, null=True)
     charlevel = IntegerField(default=1)
     chargold = IntegerField(default=300)
 

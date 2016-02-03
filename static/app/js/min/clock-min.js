@@ -1,0 +1,1 @@
+function updateClock(){var e=new Date,t=e.getHours(),a=e.getMinutes(),c=e.getSeconds();a=(10>a?"0":"")+a,c=(10>c?"0":"")+c;var n=12>t?"AM":"PM";t=t>12?t-12:t,t=0==t?12:t;var o=t+":"+a+":"+c+" "+n;$("#clock").html(o)}
