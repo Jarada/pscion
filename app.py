@@ -13,17 +13,40 @@ fast deployment of web services. Feel free to browse below; most things are
 self explanatory but I've added comments where I feel they'll benefit.
 """
 
-from flask import Flask, abort, render_template, request
+from flask import Flask, abort, jsonify, render_template, request
 from game.model import user, cclass
+from game.story import story
+import game.story.load as sload
+import game.locations.load as lload
 import uuid
 
+# This initialises the web server; it is started at the bottom of this file
 app = Flask(__name__)
 
+# We pull in the story here and load in all story elements
+gstory = story.Story()
+sload.load(gstory)
+lload.load(gstory)
+player = user.User.get(user.User.pid == 1)
 
+
+def element():
+    return gstory.get(player)
+
+
+def location():
+    return gstory.get_location(player.location)
+
+
+# Routes indicate what URL is needed for a function to be called.
+# In this case, it's the root directory, or pscion.wuufu.co.uk.
 @app.route('/')
 def login():
     # Return Login Page
-    return render_template("login.html")
+    # return render_template("login.html")
+    e = element()
+    l = location()
+    return render_template("game.html", player=player, content="layouts/%s" % e.default, element=e, location=l)
 
 
 @app.route('/q/logintemp')
@@ -64,15 +87,57 @@ def register_fin():
     try:
         # Let's try to save the User
         query = user.User.get(user.User.pid == request.form['user'])
-        query.character = request.form['name']
-        query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['class'])
-        query.save()
+        if query.sesskey == request.form['sesskey']:
+            query.character = request.form['name']
+            query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['class'])
+            query.sesskey = uuid.uuid4()
+            query.save()
 
-        # Alright we're good! Let's login!
+            # Alright we're good! Let's login!
+        else:
+            raise ValueError("Invalid Sesskey")
     except:
         return abort(500)
 
 
+@app.route('/q/start')
+def start():
+    if not player.logs:
+        return jsonify(**element().json(player))
+    return jsonify(**player.json_logs(element()))
+
+
+@app.route('/q/act', methods=['POST'])
+def act():
+    if not 'value' in request.form or len(request.form['value']) == 0:
+        return abort(401)
+    action = request.form['value'].split("-")
+    if action[0] == 'r':
+        result = element().respond(player, action[1])
+    elif action[0] == 'l' and action[1] == 'look':
+        output = location().look(player)
+        result = element().execute(player, action[1], output)
+    else:
+        result = element().execute(player, action[1])
+    if isinstance(result, story.StoryAdvancement):
+        player.gamemajor = result.major
+        player.gameminor = result.minor
+        player.gamestate = result.state
+        player.gameargs = result.args
+        player.save()
+        return jsonify(**element().json(player, result.commands))
+    elif isinstance(result, story.StoryPass):
+        return jsonify(**element().json(player, result.commands))
+    print(result)
+    return abort(400)
+
+
+@app.route('/q/localeact')
+def localeact():
+    return jsonify(**{"actions": location().actions(player)})
+
+# This code starts the server.
+# The __main__ check means it only runs if this file is the entry point of the program.
 if __name__ == '__main__':
     app.debug = True
     app.run()

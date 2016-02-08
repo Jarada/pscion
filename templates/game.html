@@ -4,16 +4,18 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pscion</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/normalize.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/foundation.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/font-awesome/css/font-awesome.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='app/css/game.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/normalize.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/foundation.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/selectize/dist/css/selectize.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/selectize/dist/css/selectize.default.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/font-awesome/css/font-awesome.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='app/css/game.css') }}" type="text/css" />
 </head>
 <body>
 
 <div id="wrapper">
     <div class="row">
-        <div class="large-2 columns box" id="menu">
+        <div class="large-2 columns box" id="menu" {% if "#menu" in element.hidden %}style="display: none;"{%  endif %}>
             <div class="row first-row">
                 <div class="large-12 columns">
                     <img src="{{ url_for('static', filename='app/img/pscionred.png') }}" alt="Pscion" />
@@ -24,14 +26,6 @@
                     <a href="#">
                         <i class="fa fa-gamepad"></i><br/>
                         Game
-                    </a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="large-12 columns">
-                    <a href="#">
-                        <i class="fa fa-map-signs"></i><br/>
-                        Navigation
                     </a>
                 </div>
             </div>
@@ -59,27 +53,38 @@
                     </a>
                 </div>
             </div>
+            <div class="row">
+                <div class="large-12 columns">
+                    <a href="#">
+                        <i class="fa fa-flask"></i><br/>
+                        Skills
+                    </a>
+                </div>
+            </div>
             <div class="row last-row">
                 <div class="large-12 columns">
                     <a href="#">
-                        <i class="fa fa-envelope"></i><br/>
-                        Mail
+                        <i class="fa fa-book"></i><br/>
+                        Journal
                     </a>
                 </div>
             </div>
         </div>
         <div class="large-10 columns">
-            <div class="row" id="top-row">
+            <div class="row" id="top-row" {% if "#top-row" in element.hidden %}style="display: none;"{%  endif %}>
                 <div class="large-4 columns home-wrap">
                     <div class="row box">
-                        <div class="large-12 columns">
-                            <i class="fa fa-map-signs"></i> Home
+                        <div class="large-8 columns home-span-wrap">
+                            <i class="fa fa-map-signs"></i> <span>{{ location.name }}</span>
+                        </div>
+                        <div class="large-4 columns level-span-wrap">
+                            <i class="fa fa-bullseye"></i> <span>L{{ player.charlevel }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="large-6 columns time-wrap">
                     <div class="row box">
-                        <div class="large-6 columns">Welcome, User!</div>
+                        <div class="large-6 columns">Welcome, {{ player.character }}!</div>
                         <div class="large-4 columns"><i class="fa fa-clock-o"></i> <span id="clock"></span></div>
                         <div class="large-2 columns" id="spinner"><i class="fa fa-spinner"></i></div>
                     </div>
@@ -88,22 +93,8 @@
                     <a href="#" class="button alert small box">Logout</a>
                 </div>
             </div>
-            <div class="row">
-                <div class="large-9 columns content-wrap">
-                    <div id="content" class="box">
-                        <div class="message zaphyr"><span class="sender">Zaphyr:</span> Hey! Hey! Wake up! It's time to get up!</div>
-                        <div class="message zaphyr">...</div>
-                        <div class="message zaphyr"><span class="sender">Zaphyr:</span> Hey! Hey! Really, you're gonna be late!</div>
-                    </div>
-                </div>
-                <div class="large-3 columns sidebar-wrap">
-                    <div id="sidebar">
-                        <div id="money" class="box">
-                            <div><i class="fa fa-money"></i> Balance:</div>
-                            <div class="money">300g</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="row" id="content">
+                {% include content %}
             </div>
         </div>
     </div>
@@ -111,6 +102,7 @@
 
 <script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='bower_components/foundation/js/foundation.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/selectize/dist/js/standalone/selectize.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='app/js/clock.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='app/js/game.js') }}"></script>
 </body>
