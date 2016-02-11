@@ -14,9 +14,14 @@ from game.story import story
 from game.commands import command
 
 
-class TutorialZero(story.StoryElement):
+class Tutorial(story.StoryElement):
+    def __init__(self, state, commands):
+        super().__init__(0, 0, state, commands)
+
+
+class TutorialZero(Tutorial):
     def __init__(self, player):
-        super().__init__(0, 0, 0, [
+        super().__init__(0, [
             command.Wait(2000),
             command.SetElementStatus(".central-wrap", True),
             command.SendMessage("Zaphyr", "Hey! Hey! Wake up! It's time to get up!", 4000, "zaphyr"),
@@ -36,9 +41,9 @@ class TutorialZero(story.StoryElement):
         return story.StoryAdvancement(0, 0, 1, response)
 
 
-class TutorialOne(story.StoryElement):
+class TutorialOne(Tutorial):
     def __init__(self, player):
-        super().__init__(0, 0, 1, [])
+        super().__init__(1, [])
         result = player.gameargs
         if result == "aaargh":
             self.commands.append(command.SendMessage(player.character, "Aaargh!", 3000, "player"))
@@ -50,9 +55,11 @@ class TutorialOne(story.StoryElement):
             self.commands.append(command.SendMessage(player.character, "Don't wanna go to school!", 3000, "player"))
             self.commands.append(command.SendMessage("Zaphyr", "You're not that young! You've grown enough you are actually working for a change.", 4000, "zaphyr"))
         self.commands.extend([
+            command.SetActionBarStatus(False),
             command.UpdateLocationActions(),
             command.SendMessage("Zaphyr", "Let's try something else.", 4000, "zaphyr"),
-            command.SendMessage("Zaphyr", "Perhaps if you open your eyes and look around your room, you'll feel more awake. Use the dropdown and try it now!", 0, "zaphyr")
+            command.SendMessage("Zaphyr", "Perhaps if you open your eyes and look around your room, you'll feel more awake. Use the dropdown and try it now!", 0, "zaphyr"),
+            command.SetActionBarStatus(True)
         ])
         self.hidden = ["#menu"]
 
@@ -61,9 +68,10 @@ class TutorialOne(story.StoryElement):
             return story.StoryAdvancement(0, 0, 2, None, output)
 
 
-class TutorialTwo(story.StoryElement):
+class TutorialTwo(Tutorial):
     def __init__(self, player):
-        super().__init__(0, 0, 2, [
+        super().__init__(2, [
+            command.SetActionBarStatus(False),
             command.UpdateLocationActions(),
             command.SendMessage("Zaphyr", "Well, it's not much, but it's home.", 2000, "zaphyr"),
             command.SendMessage("Zaphyr", "Now, I'll let you explore your home a little. Use the dropdown to examine and pickup things, and the buttons to the left to sort out your own inventory.", 6000, "zaphyr"),
@@ -71,14 +79,15 @@ class TutorialTwo(story.StoryElement):
             command.SendMessage("Zaphyr", "Almost there...", 3000, "zaphyr"),
             command.SetElementStatus("#menu", True),
             command.Wait(450),
-            command.SendMessage("Zaphyr", "There you go! Now when you're done, click the 'Home' text at the top and select to move out into the corridor.", 2000, "zaphyr")
+            command.SendMessage("Zaphyr", "There you go! Now when you're done, click the 'Home' text at the top and select to move out into the corridor.", 0, "zaphyr"),
+            command.SetActionBarStatus(True)
         ])
         self.hidden = ["#menu"]
         self.unhide = "#menu"
 
     def execute(self, player, action, output=None):
-        if action == 'look':
-            return story.StoryAdvancement(0, 0, 2, None, output)
+        print("OUTPUT %s" % str(output))
+        return story.StoryPass(output)
 
 
 def load(storyobj):

@@ -1,0 +1,45 @@
+<div class="large-8 columns central-wrap" {% if ".central-wrap" in element.hidden %}style="display: none;"{%  endif %}>
+    <div id="central" class="wide">
+        <div class="box inventory">
+            <div class="player-name">
+                {{ player.character }}'s Inventory
+                <div class="player-money"><i class="fa fa-money"></i> {{ player.chargold }}</div>
+            </div>
+            {% set items = player.items %}
+            {% for i in range(0, 5) %}
+                <div class="inventory-row">
+                {% for j in range(0, 11) %}
+                    {% set item = player.item_for_inventory(items, i, j) %}
+                    <div class="inventory-item {% if item %}inventory-item-filled{% else %}inventory-item-empty{% endif %}">
+                        {% if item %}
+                        <img src="{{ url_for('static', filename='app/img/items/' + item.image) }}" alt="Blank Item" />
+                        <div class="tipped">
+                            <div class="tipped-title">
+                                {{ item.name }}
+
+                                {% if item.price > 0 or item.vital %}
+                                <span style="padding-left: 10px;">
+                                    <strong>(
+                                        {% if item.vital %}
+                                            <span title="Quest Item"><i class="fa fa-bookmark"></i></span>
+                                        {% endif %}
+                                        {% if item.price > 0 %}
+                                            <span title="Price"><i class="fa fa-money"></i> {{ item.price }}</span>
+                                        {% endif %}
+                                    )</strong>
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="tipped-content">{{ item.description }}</div>
+                        </div>
+                        {% else %}
+                        <img src="{{ url_for('static', filename='app/img/items/blnk.png') }}" alt="Blank Item" />
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        {# Store Goes Here #}
+    </div>
+</div>

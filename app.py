@@ -27,15 +27,19 @@ app = Flask(__name__)
 gstory = story.Story()
 sload.load(gstory)
 lload.load(gstory)
-player = user.User.get(user.User.pid == 1)
+playeri = user.User.get(user.User.pid == 1)
+
+
+def player():
+    return playeri
 
 
 def element():
-    return gstory.get(player)
+    return gstory.get(player())
 
 
 def location():
-    return gstory.get_location(player.location)
+    return gstory.get_location(player().location)
 
 
 # Routes indicate what URL is needed for a function to be called.
@@ -46,7 +50,7 @@ def login():
     # return render_template("login.html")
     e = element()
     l = location()
-    return render_template("game.html", player=player, content="layouts/%s" % e.default, element=e, location=l)
+    return render_template("game.html", player=player(), content="layouts/%s" % e.default, element=e, location=l)
 
 
 @app.route('/q/logintemp')
@@ -102,9 +106,15 @@ def register_fin():
 
 @app.route('/q/start')
 def start():
-    if not player.logs:
-        return jsonify(**element().json(player))
-    return jsonify(**player.json_logs(element()))
+    if not player().logs:
+        return jsonify(**element().json(player()))
+    return jsonify(**player().json_logs(element()))
+
+
+@app.route('/q/menu')
+def menu():
+    return render_template("layouts/%s.html" % request.args.get("menu"), player=player(),
+                           element=element(), location=location())
 
 
 @app.route('/q/act', methods=['POST'])
@@ -112,29 +122,37 @@ def act():
     if not 'value' in request.form or len(request.form['value']) == 0:
         return abort(401)
     action = request.form['value'].split("-")
+    print(action)
+    p = player()
     if action[0] == 'r':
-        result = element().respond(player, action[1])
+        result = element().respond(p, action[1])
     elif action[0] == 'l' and action[1] == 'look':
-        output = location().look(player)
-        result = element().execute(player, action[1], output)
+        output = location().look(p)
+        result = element().execute(p, action[1], output)
+    elif action[0] == 'l' and action[1] == 'examine':
+        output = location().examine(p, action[2])
+        result = element().execute(p, action[1], output)
+    elif action[0] == 'l' and action[1] == 'pickup':
+        output = location().pickup(p, action[2])
+        result = element().execute(p, action[1], output)
     else:
-        result = element().execute(player, action[1])
+        result = element().execute(p, action[1])
     if isinstance(result, story.StoryAdvancement):
-        player.gamemajor = result.major
-        player.gameminor = result.minor
-        player.gamestate = result.state
-        player.gameargs = result.args
-        player.save()
-        return jsonify(**element().json(player, result.commands))
+        p.gamemajor = result.major
+        p.gameminor = result.minor
+        p.gamestate = result.state
+        p.gameargs = result.args
+        p.save()
+        return jsonify(**element().json(p, result.commands))
     elif isinstance(result, story.StoryPass):
-        return jsonify(**element().json(player, result.commands))
+        return jsonify(**result.json(p))
     print(result)
     return abort(400)
 
 
 @app.route('/q/localeact')
 def localeact():
-    return jsonify(**{"actions": location().actions(player)})
+    return jsonify(**{"actions": location().actions(player())})
 
 # This code starts the server.
 # The __main__ check means it only runs if this file is the entry point of the program.

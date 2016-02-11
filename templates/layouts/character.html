@@ -1,0 +1,30 @@
+<div class="large-12 columns central-wrap" {% if ".central-wrap" in element.hidden %}style="display: none;"{%  endif %}>
+    <div id="central">
+        <div class="character player-full-box box">
+            <div class="player-name">{{ player.character }}</div>
+            <div class="player-class">{{ player.charpclass.name }}{% if player.charsclass %} / {{ player.charsclass.name }}{% endif %}</div>
+            <div class="player-skills">
+                <div class="skill-box"></div>
+                <div class="skill-box"></div>
+                <div class="skill-box"></div>
+                <div class="skill-box"></div>
+            </div>
+            <div class="row">
+                <div class="player-health large-6 columns">
+                    <div class="success progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.charhealth }}" aria-valuemax="{{ player.charmaxhealth }}" aria-valuetext="{{ player.charmaxhealth }} health">
+                        <span class="meter" style="width: {{ player.health_percent() }}%">
+                            <p class="meter-text">{{ player.charmaxhealth }}</p>
+                        </span>
+                    </div>
+                </div>
+                <div class="player-energy large-6 columns">
+                    <div class="progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.charenergy }}" aria-valuemax="{{ player.charmaxenergy }}" aria-valuetext="{{ player.charmaxenergy }} energy">
+                        <span class="meter" style="width: {{ player.energy_percent() }}%">
+                            <p class="meter-text">{{ player.charmaxenergy }}</p>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

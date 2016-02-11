@@ -4,9 +4,8 @@
 database.py - main Pscion database file
 Copyright 2016, David Jarrett (wuufu.co.uk)
 
-This is where Peewee resides. Peewee manages the storage of all
-user based data; that is, stuff that you, the player, do in the
-game. After all, we gotta store it somewhere...
+This is where Peewee resides. Peewee manages the storage of all user based data; that is, stuff that you, the player,
+do in the game. After all, we gotta store it somewhere...
 """
 
 from peewee import SqliteDatabase, Model

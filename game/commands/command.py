@@ -20,6 +20,9 @@ class Command:
     def json(self):
         return self.json
 
+    def log(self, player):
+        pass
+
 
 class Wait(Command):
     def __init__(self, time):
@@ -36,6 +39,11 @@ class SetElementStatus(Command):
         super().__init__({"type": "status", "element": element, "status": status})
 
 
+class SetActionBarStatus(Command):
+    def __init__(self, status):
+        super().__init__({"type": "actbarstatus", "status": status})
+
+
 class SetResponses(Command):
     def __init__(self, responses):
         super().__init__({"type": "responses", "responses": responses})
@@ -44,8 +52,14 @@ class SetResponses(Command):
 class SendMessage(Command):
     def __init__(self, sender, msg, time, eclass=None):
         super().__init__({"type": "msg", "sender": sender, "msg": msg, "time": time})
+        self.sender = sender
+        self.msg = msg
+        self.eclass = eclass
         if eclass:
             self.json["eclass"] = eclass
+
+    def log(self, player):
+        player.add_log(self)
 
 
 class SendSound(Command):

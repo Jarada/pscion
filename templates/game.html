@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/foundation/css/foundation.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/selectize/dist/css/selectize.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/selectize/dist/css/selectize.default.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='lib/tipped/tipped.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/font-awesome/css/font-awesome.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='app/css/game.css') }}" type="text/css" />
 </head>
@@ -23,7 +24,7 @@
             </div>
             <div class="row">
                 <div class="large-12 columns">
-                    <a href="#">
+                    <a href="#" id="game" class="active">
                         <i class="fa fa-gamepad"></i><br/>
                         Game
                     </a>
@@ -31,7 +32,7 @@
             </div>
             <div class="row">
                 <div class="large-12 columns">
-                    <a href="#">
+                    <a href="#" id="character">
                         <i class="fa fa-user"></i><br/>
                         Character
                     </a>
@@ -47,7 +48,7 @@
             </div>
             <div class="row">
                 <div class="large-12 columns">
-                    <a href="#">
+                    <a href="#" id="inventory">
                         <i class="fa fa-shopping-bag"></i><br/>
                         Inventory
                     </a>
@@ -55,7 +56,7 @@
             </div>
             <div class="row">
                 <div class="large-12 columns">
-                    <a href="#">
+                    <a href="#" id="skills">
                         <i class="fa fa-flask"></i><br/>
                         Skills
                     </a>
@@ -63,7 +64,7 @@
             </div>
             <div class="row last-row">
                 <div class="large-12 columns">
-                    <a href="#">
+                    <a href="#" id="journal">
                         <i class="fa fa-book"></i><br/>
                         Journal
                     </a>
@@ -72,21 +73,20 @@
         </div>
         <div class="large-10 columns">
             <div class="row" id="top-row" {% if "#top-row" in element.hidden %}style="display: none;"{%  endif %}>
-                <div class="large-4 columns home-wrap">
+                <div class="large-5 columns home-wrap">
                     <div class="row box">
-                        <div class="large-8 columns home-span-wrap">
-                            <i class="fa fa-map-signs"></i> <span>{{ location.name }}</span>
+                        <div class="large-9 columns home-span-wrap">
+                            <a href="#" id="travelModalRevealer"><i class="fa fa-map-signs"></i> <span>{{ location.name }}</span></a>
                         </div>
-                        <div class="large-4 columns level-span-wrap">
+                        <div class="large-3 columns level-span-wrap">
                             <i class="fa fa-bullseye"></i> <span>L{{ player.charlevel }}</span>
                         </div>
                     </div>
                 </div>
-                <div class="large-6 columns time-wrap">
+                <div class="large-5 columns time-wrap">
                     <div class="row box">
                         <div class="large-6 columns">Welcome, {{ player.character }}!</div>
-                        <div class="large-4 columns"><i class="fa fa-clock-o"></i> <span id="clock"></span></div>
-                        <div class="large-2 columns" id="spinner"><i class="fa fa-spinner"></i></div>
+                        <div class="large-6 columns"><i class="fa fa-clock-o"></i> <span id="clock"></span></div>
                     </div>
                 </div>
                 <div class="large-2 columns logout-wrap">
@@ -99,10 +99,32 @@
         </div>
     </div>
 </div>
+<div class="reveal-modal" id="travelModal" data-reveal aria-labelledby="travelModalTitle" aria-hidden="true" role="dialog">
+  <div class="travel-image">
+      <img src="{{ url_for('static', filename='app/img/zaphyr.png') }}" alt="Zaphyr" style="width: 300px;" />
+  </div>
+  <div class="travel-right">
+      <h2 id="travelModalTitle">Let's go!</h2>
+      <select id="travel-select">
+          <option value=""></option>
+          <option value="home" selected>Home</option>
+          <option value="corridor">Corridor</option>
+      </select>
+      <div class="text-center shoeprints">
+          <a href="#" class="btn">
+              <img src="{{ url_for('static', filename='app/img/shoeprints.png') }}" alt="Travel" />
+          </a>
+      </div>
+  </div>
+  <a class="close-reveal-modal" data-close aria-label="Close">
+      <span>&#215;</span>
+  </a>
+</div>
 
 <script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='bower_components/foundation/js/foundation.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/foundation/js/foundation.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='bower_components/selectize/dist/js/standalone/selectize.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/tipped/tipped.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='app/js/clock.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='app/js/game.js') }}"></script>
 </body>

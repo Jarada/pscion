@@ -24,6 +24,14 @@ body {
     border-radius: 5px;
 }
 
+p.meter-text {
+    font-size: 0.75em;
+    color: white;
+    text-shadow: 1px 1px #666;
+    position: relative;
+    left: 5px;
+}
+
 /* #menu */
 #menu {
     text-align: center;
@@ -45,6 +53,10 @@ body {
     color: grey;
 }
 
+#menu a.active {
+    color: #008CBA;
+}
+
 /* #top-row */
 #top-row {
     font-size: 0.85em;
@@ -64,14 +76,37 @@ body {
     float: right;
 }
 
-#spinner {
-    color: red;
+#travelModal {
+    background-color: #4C5D84;
+}
+
+#travelModal #travelModalTitle {
+    color: white;
+    text-shadow: 3px 3px #333;
+}
+
+#travelModal .travel-image {
+    width: 300px;
+    float: left;
+}
+
+#travelModal .travel-right {
+    padding-left: 300px;
+}
+
+#travelModal .shoeprints {
+    position: relative;
+    top: 20px;
 }
 
 /* Sidebar */
 .sidebar-wrap {
     padding-left: 0;
     padding-right: 0;
+}
+
+#sidebar .box {
+    margin-bottom: 10px;
 }
 
 .action-box {
@@ -100,10 +135,34 @@ body {
     top: 6px;
 }
 
+.player-name {
+    padding: 2px 10px;
+    font-weight: bold;
+    background-color: #eee;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.player-class {
+    padding: 2px 10px;
+}
+
+.player-health div {
+    margin-bottom: 0;
+}
+
+.player-energy {
+    padding-bottom: 1px;
+}
+
 /* Central */
 #central {
     height: 399px;
     padding: 0.8em 1.5em;
+}
+
+#central.wide {
+    padding: 0;
 }
 
 /* Messages */
@@ -134,4 +193,32 @@ body {
 
 .message.enemy {
     color: darkred;
+}
+
+/* Inventory */
+
+.inventory .player-money {
+    padding: 2px 10px;
+    float: right;
+}
+
+.inventory-row {
+    padding: 5px;
+}
+
+.inventory-item {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    margin: 0 4px;
+}
+
+.inventory-item img {
+    width: 32px;
+    height: 32px;
+}
+
+.inventory-item .tipped {
+    display: none;
+    max-width: 240px;
 }

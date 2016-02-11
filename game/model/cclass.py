@@ -1,13 +1,14 @@
+#!/usr/bin/env python
+# coding=utf-8
 """
-database.py - User database model
+cclass.py - User database model
 Copyright 2016, David Jarrett (wuufu.co.uk)
 
-This file contains core information about the classes used in the game.
-Most characters have two classes, a primary and a secondary class. Some
-classes can only be picked to be the secondary class.
+This file contains core information about the classes used in the game. Most characters have two classes, a primary
+and a secondary class. Some classes can only be picked to be the secondary class.
 
-Characters can load both primary and secondary skills of their primary
-class but only non-primary skills of their secondary class.
+Characters can load both primary and secondary skills of their primary class but only non-primary skills of their
+secondary class.
 """
 
 from peewee import BooleanField, PrimaryKeyField, TextField

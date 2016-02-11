@@ -17,6 +17,7 @@ Pscion is a RPG style game designed for [Wintreath's Programming Challenge](http
   * [jQuery Tubular](http://www.seanmccambridge.com/tubular/) - Something that puts YouTube videos as a webpage background... hello!
   * [Font Awesome](https://fortawesome.github.io/Font-Awesome/) - Used to make icons awesome.
   * [Selectize](https://selectize.github.io/selectize.js/) - Makes dropdowns super special and not boring.
+  * [Tipped](http://www.tippedjs.com/) - Makes tooltips become super special and allows for fancy shmancy HTML.
 
 # Credits
 

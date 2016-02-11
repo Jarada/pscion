@@ -21,8 +21,10 @@ class StoryElement:
         output = {"commands": []}
         if isinstance(additional, list):
             for command in additional:
+                command.log(player)
                 output["commands"].append(command.json)
         for command in self.commands:
+            command.log(player)
             output["commands"].append(command.json)
         return output
 
@@ -44,7 +46,14 @@ class StoryAdvancement:
 
 class StoryPass:
     def __init__(self, commands):
-        self.commands = []
+        self.commands = commands
+
+    def json(self, player):
+        output = {"commands": []}
+        for command in self.commands:
+            command.log(player)
+            output["commands"].append(command.json)
+        return output
 
 
 class Story:

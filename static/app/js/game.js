@@ -11,7 +11,7 @@ function executeResponses( responses ) {
     if (action.length) {
         var select = action[0].selectize;
         for (var objkey in select.options) {
-            var obj = select.options[objkey]
+            var obj = select.options[objkey];
             if (obj.optgroup == 'responses') {
                 select.removeOption(objkey);
             }
@@ -52,6 +52,18 @@ function executeLocaleAct() {
     });
 }
 
+function executeActStatus( status ) {
+    var action = $("#action-select");
+    if (action.length) {
+        var select = action[0].selectize;
+        if (status) {
+            select.unlock();
+        } else {
+            select.lock();
+        }
+    }
+}
+
 function executeMsg( sender, msg, eclass ) {
     if ($("#central.messages").length) {
         var html = '<div class="message ' + eclass + '">';
@@ -80,7 +92,9 @@ function executeCommands(commands, index) {
                 executeMsg(command["sender"], command["msg"], "");
             }
         } else if (command["type"] == "localeact") {
-            executeLocaleAct()
+            executeLocaleAct();
+        } else if (command["type"] == "actbarstatus") {
+            executeActStatus(command["status"]);
         }
 
         if ("time" in command && command["time"] > 0) {
@@ -121,14 +135,52 @@ function setupPage() {
             }
         });
     }
+    Tipped.create('.inventory-item-filled', function(element) {
+      return {
+        title: $(element).find(".tipped-title").html(),
+        content: $(element).find(".tipped-content").html()
+      };
+    }, {
+      skin: 'light',
+      //close: true,
+      //hideOn: false,
+    });
 }
 
 jQuery(document).ready(function () {
     setInterval('updateClock()', 1000);
 
     setupPage();
+    $("#central.messages").scrollTop($('#central.messages').prop("scrollHeight"));
+
+    $("#menu").find("a").click(function () {
+        var id = $(this).attr("id");
+        $.ajax("/q/menu", {
+            type: "GET",
+            data: {
+                menu: id
+            }
+        }).done(function (html) {
+            $("#content").fadeOut(400, function () {
+                $("#menu").find("a.active").each(function () {
+                    $(this).removeClass("active");
+                });
+                $("#" + id).addClass("active");
+                $("#content").html(html).fadeIn(400, function() {
+                    $("#central.messages").scrollTop($('#central.messages').prop("scrollHeight"));
+                });
+                setupPage();
+                executeLocaleAct();
+            });
+        });
+    });
+    $("#travelModalRevealer").click(function() {
+        $("#travelModal").foundation('reveal', 'open');
+    });
 
     $.ajax("/q/start").done(function( data ) {
-        executeCommands(data["commands"], 0);
+        if (data) {
+            executeCommands(data["commands"], 0);
+        }
     });
 });
