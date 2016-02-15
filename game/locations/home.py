@@ -1,8 +1,9 @@
 """
-story.py - The central story class, all inherit
+home.py - Home Sweet Home
 Copyright 2016, David Jarrett (wuufu.co.uk)
 
-Home Sweet Home
+This is where you start, at your home. You won't return to it much during the campaign though. Who knows what you'll
+see if and when you do...
 """
 
 from game.locations import location
@@ -12,7 +13,7 @@ from game.model.item import Item
 
 class Home(location.Location):
     def __init__(self):
-        super().__init__("home", "Home")
+        super().__init__("home", "Home", "your")
 
     def actions(self, player):
         if player.gamemajor == 0 and player.gameminor == 0 and player.gamestate == 1:
@@ -35,12 +36,12 @@ class Home(location.Location):
     def examine(self, player, item):
         print(item)
         if item == "book":
-            player.add_flag(0,0,2,"ebook")
+            player.add_flag(0, 0, 2, "ebook")
             return [SendMessage("", "'To Kill a Mockinghawk' by Kylie Ren. An interesting read so far, you hope "
                                     "you'll have some time to finish the book amid the work you have to do.", 0),
                     UpdateLocationActions()]
         if item == "chip":
-            player.add_flag(0,0,2,"echip")
+            player.add_flag(0, 0, 2, "echip")
             return [SendMessage("", "A Credit chip from yesterday's pay day. Has appropriate money's to add to your "
                                     "balance. You should pick this up before you leave so you actually have some "
                                     "cash.", 0),
@@ -50,7 +51,7 @@ class Home(location.Location):
                                     "there were no cars or boots in the sale. You wonder why it's still called "
                                     "that.", 0)]
         if item == "sofa":
-            if not player.flag(0,0,2,"pbook"):
+            if not player.flag(0, 0, 2, "pbook"):
                 return [SendMessage("", "It's a sofa. Made of dark leather, it has a book on it and is rather comfy "
                                     "to sit on. Perhaps you should stop looking at it?", 0)]
             else:
@@ -59,14 +60,14 @@ class Home(location.Location):
 
     def pickup(self, player, item):
         if item == "book":
-            player.add_flag(0,0,2,"pbook")
+            player.add_flag(0, 0, 2, "pbook")
             Item.create(name="Book: 'To Kill a Mockinghawk' by Kylie Ren", image="bookhawk.png",
                         description="An interesting read so far, you hope you'll have some time to finish the book "
                                     "amid the work you have to do.", price=15, player=player)
             return [SendMessage("", "You pickup the book and put it in your bag.", 0),
                     UpdateLocationActions()]
         if item == "chip":
-            player.add_flag(0,0,2,"pchip")
+            player.add_flag(0, 0, 2, "pchip")
             player.chargold += 200
             player.save()
             return [SendMessage("", "You pickup the Credit chip and gain 200 credits.", 0),
@@ -78,7 +79,7 @@ class Home(location.Location):
             book = "with a book laid on it,"
         else:
             book = ""
-        if not player.flag(0,0,2,"pchip"):
+        if not player.flag(0, 0, 2, "pchip"):
             chip = " There is a Credit chip on the floor."
         else:
             chip = ""
@@ -87,3 +88,12 @@ class Home(location.Location):
                             " and a TV on the far wall. Two doors either side of the TV lead to the kitchen and "
                             "bathroom respectively, and a door to the left leads to the exit." + chip,
                             14000 if start else 0)]
+
+    def travel(self, player):
+        if player.later_eq(0, 0, 2):
+            return ['corridor']
+
+    def travel_str(self, prev):
+        if prev == 'corridor':
+            return self._update_location('You open your front door and enter into %s %s.' % (self.pronoun, self.name),
+                                         1500)

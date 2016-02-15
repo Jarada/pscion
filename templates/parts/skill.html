@@ -1,0 +1,46 @@
+<div class="skill-filled">
+    <img src="{{ url_for('static', filename='app/img/skills/' + skill.image) }}" alt="{{ skill.name }}" />
+    {% if equipped is defined %}
+    {% if equipped > 0 %}
+    <div class="skill-equipped">
+        <a href="#" id="player-unequip-{{ uskill.pid }}" class="player-unequip">Unequip</a>
+    </div>
+    {% else %}
+    <div class="skill-equip">Equip in Slot:<br/>
+        <a href="#" id="player-equip-{{ uskill.pid }}-1" class="player-equip">One</a>
+        <a href="#" id="player-equip-{{ uskill.pid }}-2" class="player-equip">Two</a>
+        <a href="#" id="player-equip-{{ uskill.pid }}-3" class="player-equip">Three</a>
+        <a href="#" id="player-equip-{{ uskill.pid }}-4" class="player-equip">Four</a>
+    </div>
+    {% endif %}
+    {% endif %}
+    <div class="tipped">
+        <div class="tipped-title">{{ skill.name }}</div>
+        <div class="tipped-content">
+            <div class="skill-meta">
+                <span class="skill-cclass">
+                    {% if skill.cclass %}
+                    {{ skill.cclass.name }}.
+                    {% else %}
+                    Standard.
+                    {% endif %}
+                </span>
+                <span class="skill-primary">
+                    {% if skill.primary %}
+                    Primary.
+                    {% else %}
+                    Secondary.
+                    {% endif %}
+                </span>
+                <span class="skill-e">E:{{ skill.energy }}</span>
+                <span class="skill-t">T:{{ skill.time }}</span>
+                {% if skill.recharge >= 0 %}
+                <span class="skill-r">R:{{ skill.recharge }}</span>
+                {% else %}
+                <span class="skill-r">R:Combat</span>
+                {% endif %}
+            </div>
+            <div class="skill-description">{{ skill.description_str(player)|safe }}</div>
+        </div>
+    </div>
+</div>

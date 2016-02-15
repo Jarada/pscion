@@ -52,6 +52,28 @@ function executeLocaleAct() {
     });
 }
 
+function executeLocaleTravel() {
+    $.ajax("/q/localetravel").done(function( data ) {
+        console.log(data);
+        var action = $("#travel-select");
+        if (action.length) {
+            var select = action[0].selectize;
+            select.clearOptions();
+            console.log(data["linked"]);
+            var valueset = false;
+            for (var objkey in data["linked"]) {
+                var obj = data["linked"][objkey];
+                console.log(obj);
+                select.addOption({value: obj["value"], text: obj["name"]});
+                if (!valueset) {
+                    valueset = true;
+                    select.setValue(obj["value"], true);
+                }
+            }
+        }
+    });
+}
+
 function executeActStatus( status ) {
     var action = $("#action-select");
     if (action.length) {
@@ -93,6 +115,10 @@ function executeCommands(commands, index) {
             }
         } else if (command["type"] == "localeact") {
             executeLocaleAct();
+        } else if (command["type"] == "localetravel") {
+            executeLocaleTravel();
+        } else if (command["type"] == "location") {
+            $("#travelModalRevealer").find("span").text(command["name"]);
         } else if (command["type"] == "actbarstatus") {
             executeActStatus(command["status"]);
         }
@@ -135,7 +161,39 @@ function setupPage() {
             }
         });
     }
+    $(".player-unequip").click(function() {
+        $.ajax("/q/punequip", {
+            type: 'POST',
+            data: {
+                skill: $(this).attr("id")
+            }
+        }).done(function() {
+            Tipped.init();
+            $("#character").trigger('click');
+        });
+    });
+    $(".player-equip").click(function() {
+        $.ajax("/q/pequip", {
+            type: 'POST',
+            data: {
+                skill: $(this).attr("id")
+            }
+        }).done(function() {
+            Tipped.init();
+            $("#character").trigger('click');
+        });
+    });
     Tipped.create('.inventory-item-filled', function(element) {
+      return {
+        title: $(element).find(".tipped-title").html(),
+        content: $(element).find(".tipped-content").html()
+      };
+    }, {
+      skin: 'light',
+      //close: true,
+      //hideOn: false,
+    });
+    Tipped.create('.skill-filled', function(element) {
       return {
         title: $(element).find(".tipped-title").html(),
         content: $(element).find(".tipped-content").html()
@@ -174,8 +232,23 @@ jQuery(document).ready(function () {
             });
         });
     });
+
     $("#travelModalRevealer").click(function() {
         $("#travelModal").foundation('reveal', 'open');
+    });
+    var travel = $("#travel-select").selectize();
+    $(".shoeprints").find('a').click(function() {
+        $.ajax("/q/travel", {
+            type: "GET",
+            data: {
+                key: travel[0].selectize.getValue()
+            }
+        }).done(function( data ) {
+            $("#travelModal").foundation('reveal', 'close');
+            if (data) {
+                executeCommands(data["commands"], 0);
+            }
+        });
     });
 
     $.ajax("/q/start").done(function( data ) {

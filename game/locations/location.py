@@ -6,6 +6,8 @@ This contains the core class for managing the location elements within the game.
 All necessary imports are linked here.
 """
 
+from game.commands.command import SendMessage, UpdateLocationName
+
 
 class Location:
 
@@ -13,21 +15,39 @@ class Location:
     ACT_EXAMINE = {"value": "l-examine", "icon": "search", "text": "", "optgroup": "examine", "optlabel": "Examine"}
     ACT_PICKUP = {"value": "l-pickup", "icon": "hand-grab-o", "text": "", "optgroup": "pickup", "optlabel": "Pickup"}
 
-    def __init__(self, key, name):
+    def __init__(self, key, name, pronoun=""):
         self.key = key
         self.name = name
+        self.pronoun = pronoun
+        self.linked = []
 
     def actions(self, player):
-        raise NotImplementedError
+        pass
 
     def look(self, player):
-        raise NotImplementedError
+        pass
 
     def examine(self, player, item):
-        raise NotImplementedError
+        pass
 
     def pickup(self, player, item):
-        raise NotImplementedError
+        pass
+
+    def travel(self, player):
+        pass
+
+    def _update_location(self, msg, time=1000):
+        return [
+            UpdateLocationName(self.name),
+            SendMessage("", msg, time)
+        ]
+
+    def travel_str(self, prev):
+        msg = "You move into"
+        if self.pronoun:
+            msg += " %s" % self.pronoun
+        msg += " %s." % self.name
+        return self._update_location(msg)
 
     @staticmethod
     def _act_examine(key, name):

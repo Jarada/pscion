@@ -16,6 +16,7 @@ class StoryElement:
         self.default = "game.html"
         self.hidden = []
         self.unhide = None
+        self.responses = None
 
     def json(self, player, additional=None):
         output = {"commands": []}
@@ -29,7 +30,7 @@ class StoryElement:
         return output
 
     def execute(self, player, action, output=None):
-        return StoryPass([])
+        return StoryPass([] if not output else output)
 
     def respond(self, player, response):
         return StoryPass([])
@@ -74,10 +75,16 @@ class Story:
     def add_location(self, key, location):
         self.locations[key] = location
 
-    def get_location(self, key):
+    def get_location(self, player, key):
         try:
             cls = self.locations[key]
-            return cls()
+            l = cls()
+            travel = l.travel(player)
+            if travel:
+                for link in travel:
+                    linkcls = self.locations[link]
+                    l.linked.append(linkcls())
+            return l
         except KeyError:
             return None
 

@@ -1,0 +1,16 @@
+<div class="large-12 columns central-wrap" {% if ".central-wrap" in element.hidden %}style="display: none;"{%  endif %}>
+    <div id="central" class="wide">
+        <div class="box skills">
+            <div class="skills-title">
+                Available Skills
+            </div>
+            {% set skills = player.skills %}
+            <div class="skills-row">
+                {% for uskill in skills %}
+                    {% set skill = uskill.skill %}
+                    {% include "parts/skill.html" %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

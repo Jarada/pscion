@@ -75,17 +75,17 @@
             <div class="row" id="top-row" {% if "#top-row" in element.hidden %}style="display: none;"{%  endif %}>
                 <div class="large-5 columns home-wrap">
                     <div class="row box">
-                        <div class="large-9 columns home-span-wrap">
+                        <div class="large-6 columns home-span-wrap">
                             <a href="#" id="travelModalRevealer"><i class="fa fa-map-signs"></i> <span>{{ location.name }}</span></a>
                         </div>
-                        <div class="large-3 columns level-span-wrap">
-                            <i class="fa fa-bullseye"></i> <span>L{{ player.charlevel }}</span>
+                        <div class="large-6 columns level-span-wrap">
+                            <i class="fa fa-bullseye"></i> <span>L{{ player.charlevel }} ({{ player.charexp }} exp)</span>
                         </div>
                     </div>
                 </div>
                 <div class="large-5 columns time-wrap">
                     <div class="row box">
-                        <div class="large-6 columns">Welcome, {{ player.character }}!</div>
+                        <div class="large-6 columns">Welcome, {{ player.name }}!</div>
                         <div class="large-6 columns"><i class="fa fa-clock-o"></i> <span id="clock"></span></div>
                     </div>
                 </div>
@@ -106,9 +106,10 @@
   <div class="travel-right">
       <h2 id="travelModalTitle">Let's go!</h2>
       <select id="travel-select">
-          <option value=""></option>
-          <option value="home" selected>Home</option>
-          <option value="corridor">Corridor</option>
+          <option value="{{ location.key }}" selected>{{ location.name }}</option>
+          {% for link in location.linked %}
+          <option value="{{ link.key }}">{{ link.name }}</option>
+          {% endfor %}
       </select>
       <div class="text-center shoeprints">
           <a href="#" class="btn">

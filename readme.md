@@ -19,7 +19,12 @@ Pscion is a RPG style game designed for [Wintreath's Programming Challenge](http
   * [Selectize](https://selectize.github.io/selectize.js/) - Makes dropdowns super special and not boring.
   * [Tipped](http://www.tippedjs.com/) - Makes tooltips become super special and allows for fancy shmancy HTML.
 
+Any other frameworks seen in the bower components directory are dependencies of one or more of the above frameworks.
+
 # Credits
 
 * [Alliance - The Speed of Light](https://www.youtube.com/watch?v=P99yh7DdFR4) - YouTube video from [Pandora Journey](https://www.youtube.com/user/Dendera91).
 * [Futuristic City 3 updated background](http://rich35211.deviantart.com/art/Futuristic-City-3-updated-background-319511220) - Background image used in the video above and on the main game page.
+* [Hex Icons Pack](http://martz90.deviantart.com/art/Hex-Icons-Pack-389706981) - Used for the base of the skill icons used in the game.
+* [Icons8](https://icons8.com/license/) - Used for a variety of icons in the game.
+* [IconFinder](https://www.iconfinder.com/) - Used for a variety of icons in the game.

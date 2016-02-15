@@ -8,8 +8,8 @@ This file is all about you. Yup! We store your username, password, and core char
 Over models, such as the Inventory and Companions, will reference what we have here.
 """
 
-from peewee import CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField
-from game.model import database, cclass
+from peewee import BooleanField, CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField
+from game.model import database, cclass, skill
 
 
 class User(database.BaseModel):
@@ -17,10 +17,11 @@ class User(database.BaseModel):
     username = CharField(unique=True)
     password = CharField()
     sesskey = CharField()
-    character = CharField(null=True)
+    name = CharField(null=True)
     charpclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playerprimary")
     charsclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playersecondary")
     charlevel = IntegerField(default=1)
+    charexp = IntegerField(default=0)
     chargold = IntegerField(default=0)
     charhealth = IntegerField(default=200)
     charmaxhealth = IntegerField(default=200)
@@ -50,12 +51,33 @@ class User(database.BaseModel):
         This function is called to setup the UI from a cold boot, with the update of location actions
         and the relevant element's hidden/unhidden.
         """
-        from game.commands.command import SetElementStatus, UpdateLocationActions
-        output = {"commands": [UpdateLocationActions().json]}
+        from game.commands.command import SetElementStatus, UpdateLocationActions, SetResponses
+        output = {"commands": []}
+        if element.responses:
+            output["commands"].append(SetResponses(element.responses).json)
+        else:
+            output["commands"].append(UpdateLocationActions().json)
         if element.unhide:
-            command = SetElementStatus(element.unhide, True)
-            output["commands"].append(command.json)
+            output["commands"].append(SetElementStatus(element.unhide, True).json)
         return output
+
+    def earlier(self, major, minor, state):
+        """
+        :param major: The major part of the story
+        :param minor: The minor part of the story
+        :param state: The state part of the story
+        :return: If the chosen major, minor and state are earlier in time than the player
+        """
+        return self.gamemajor <= major and self.gameminor <= minor and self.gamestate < state
+
+    def later_eq(self, major, minor, state):
+        """
+        :param major: The major part of the story
+        :param minor: The minor part of the story
+        :param state: The state part of the story
+        :return: If the chosen major, minor and state are equal to or later in time than the player
+        """
+        return self.gamemajor >= major and self.gameminor >= minor and self.gamestate >= state
 
     def health_percent(self):
         """
@@ -68,6 +90,59 @@ class User(database.BaseModel):
         :return: The percentage energy of the user
         """
         return int((float(self.charenergy) / float(self.charmaxenergy)) * 100)
+
+    def skill(self, slot):
+        """
+        :param slot: The skill slot (1-4) to get the user's skill for
+        :return: The skill (if present), or None
+        """
+        result = self.skills.select().where(UserSkill.equipped == slot)
+        if result.count() > 0:
+            return result.get()
+        return None
+
+    def class_skills(self):
+        """
+        :return: All available skills for the users selected Primary/Secondary classes
+        """
+        result = self.skills.select(UserSkill, skill.Skill).join(skill.Skill)
+        output = []
+        for sk in result:
+            if ((sk.skill.cclass is None or sk.skill.cclass == self.charpclass) and sk.skill.primary == True) or \
+                    (sk.skill.cclass == self.charsclass and sk.skill.primary == False):
+                output.append(sk)
+        return output
+
+    def equip(self, upid, slot):
+        """
+        :param slot: The skill to equip
+        :return: If the equip was successful
+        """
+        try:
+            existing = self.skills.select().where(UserSkill.equipped == slot).get()
+            if existing:
+                existing.equipped = 0
+                existing.save()
+        except Exception:
+            pass
+        skill = self.skills.select().where(UserSkill.pid == upid).get()
+        if skill:
+            skill.equipped = slot
+            skill.save()
+            return True
+        return False
+
+    def unequip(self, upid):
+        """
+        :param slot: The skill to unequip
+        :return: If the unequip was successful
+        """
+        skill = self.skills.select().where(UserSkill.pid == upid).get()
+        if skill:
+            skill.equipped = 0
+            skill.save()
+            return True
+        return False
 
     def add_flag(self, major, minor, state, flag, result=None):
         """
@@ -115,13 +190,13 @@ class User(database.BaseModel):
             return True
         return False
 
-    def ordered_items(self):
-        olist = []
-        for item in self.items:
-            olist.append(item)
-        return olist
-
     def item_for_inventory(self, olist, row, col):
+        """
+        :param olist: The list of items; this allows items to be ordered
+        :param row: The row in the Inventory list to fill
+        :param col: The column in the Inventory list to fill
+        :return: The item (if present), or None
+        """
         index = (row * 11) + col
         if len(olist) > index:
             return olist[index]
@@ -146,10 +221,21 @@ class UserLog(database.BaseModel):
     eclass = CharField(null=True)
 
 
+class UserSkill(database.BaseModel):
+    pid = PrimaryKeyField(primary_key=True)
+    user = ForeignKeyField(User, related_name="skills")
+    skill = ForeignKeyField(skill.Skill, related_name="users")
+    equipped = IntegerField(default=0)
+
+
 if not User.table_exists():
     User.create_table(fail_silently=True)
-    User.create(username="Wuufu", password="blah", sesskey="", character="Wuufu", charpclass=1)
+    User.create(username="Wuufu", password="blah", sesskey="", name="Wuufu", charpclass=1)
 if not UserFlag.table_exists():
     UserFlag.create_table(fail_silently=True)
 if not UserLog.table_exists():
     UserLog.create_table(fail_silently=True)
+if not UserSkill.table_exists():
+    UserSkill.create_table(fail_silently=True)
+    for sk in skill.Skill.select():
+        UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk)

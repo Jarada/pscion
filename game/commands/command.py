@@ -72,7 +72,30 @@ class UpdateLocationActions(Command):
         super().__init__({"type": "localeact"})
 
 
+class UpdateLocationTravel(Command):
+    def __init__(self):
+        super().__init__({"type": "localetravel"})
+
+
+class UpdateLocationName(Command):
+    def __init__(self, name):
+        super().__init__({"type": "location", "name": name})
+
+
 class ClearActionBar(Command):
     def __init__(self):
         super().__init__({"type": "clearbar"})
 
+
+class StartCombat(Command):
+    def __init__(self):
+        super().__init__({"type": "combat"})
+
+
+class CombatMessage(Command):
+    def __init__(self, msg, eclass=None):
+        super().__init__({"type": "cmsg", "msg": msg})
+        self.msg = msg
+        self.eclass = eclass
+        if eclass:
+            self.json["eclass"] = eclass

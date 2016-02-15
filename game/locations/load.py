@@ -7,8 +7,9 @@ by story elements as and when they need to be, and there is a single point
 of entry from app.py's perspective.
 """
 
-from game.locations import home
+from game.locations import home, corridor
 
 
 def load(gstory):
     gstory.add_location("home", home.Home)
+    gstory.add_location("corridor", corridor.Corridor)

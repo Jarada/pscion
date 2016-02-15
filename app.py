@@ -39,13 +39,13 @@ def element():
 
 
 def location():
-    return gstory.get_location(player().location)
+    return gstory.get_location(player(), player().location)
 
 
 # Routes indicate what URL is needed for a function to be called.
 # In this case, it's the root directory, or pscion.wuufu.co.uk.
 @app.route('/')
-def login():
+def index():
     # Return Login Page
     # return render_template("login.html")
     e = element()
@@ -117,9 +117,23 @@ def menu():
                            element=element(), location=location())
 
 
+def story_jsonify(p, result):
+    if isinstance(result, story.StoryAdvancement):
+        p.gamemajor = result.major
+        p.gameminor = result.minor
+        p.gamestate = result.state
+        p.gameargs = result.args
+        p.save()
+        return jsonify(**element().json(p, result.commands))
+    elif isinstance(result, story.StoryPass):
+        return jsonify(**result.json(p))
+    print(result)
+    return abort(400)
+
+
 @app.route('/q/act', methods=['POST'])
 def act():
-    if not 'value' in request.form or len(request.form['value']) == 0:
+    if 'value' not in request.form or len(request.form['value']) == 0:
         return abort(401)
     action = request.form['value'].split("-")
     print(action)
@@ -137,22 +151,52 @@ def act():
         result = element().execute(p, action[1], output)
     else:
         result = element().execute(p, action[1])
-    if isinstance(result, story.StoryAdvancement):
-        p.gamemajor = result.major
-        p.gameminor = result.minor
-        p.gamestate = result.state
-        p.gameargs = result.args
-        p.save()
-        return jsonify(**element().json(p, result.commands))
-    elif isinstance(result, story.StoryPass):
-        return jsonify(**result.json(p))
-    print(result)
-    return abort(400)
+    return story_jsonify(p, result)
 
 
 @app.route('/q/localeact')
 def localeact():
     return jsonify(**{"actions": location().actions(player())})
+
+
+@app.route('/q/localetravel')
+def localetravel():
+    l = location()
+    linked = [{"value": l.key, "name": l.name}]
+    for link in l.linked:
+        linked.append({"value": link.key, "name": link.name})
+    return jsonify(**{"linked": linked})
+
+
+@app.route('/q/travel')
+def travel():
+    key = request.args.get("key")
+    prev = location().key
+    if key != prev:
+        p = player()
+        p.location = key
+        p.save()
+        result = element().execute(p, 'travel', location().travel_str(prev))
+        return story_jsonify(p, result)
+    return '', 200
+
+
+@app.route('/q/pequip', methods=['POST'])
+def pequip():
+    args = request.form['skill'].split('-')
+    result = player().equip(args[2], args[3])
+    if result:
+        return '', 200
+    return abort(500)
+
+
+@app.route('/q/punequip', methods=['POST'])
+def punequip():
+    args = request.form['skill'].split('-')
+    result = player().unequip(args[2])
+    if result:
+        return '', 200
+    return abort(500)
 
 # This code starts the server.
 # The __main__ check means it only runs if this file is the entry point of the program.

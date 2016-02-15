@@ -135,7 +135,7 @@ p.meter-text {
     top: 6px;
 }
 
-.player-name {
+.player-name, .skills-title {
     padding: 2px 10px;
     font-weight: bold;
     background-color: #eee;
@@ -159,6 +159,10 @@ p.meter-text {
 #central {
     height: 399px;
     padding: 0.8em 1.5em;
+}
+
+.central-wrap.large-12 {
+    padding-right: 0;
 }
 
 #central.wide {
@@ -218,7 +222,62 @@ p.meter-text {
     height: 32px;
 }
 
-.inventory-item .tipped {
+.inventory-item .tipped, .skills-row .tipped, .player-skills .tipped {
     display: none;
     max-width: 240px;
+}
+
+/* Skills */
+
+.skills-row {
+    padding: 0 10px;
+}
+
+.skill-filled {
+    margin: 0 5px;
+}
+
+.skill-filled, .player-skills .skill-box {
+    display: inline-block;
+    text-align: center;
+}
+
+.skill-dmg, .skill-cn {
+    color: darkcyan;
+}
+
+.skill-e {
+    color: #4C5D84;
+}
+
+.skill-t {
+    color: darkgreen;
+}
+
+.skill-r {
+    color: maroon;
+}
+
+.skill-equip, .skill-equipped {
+    font-size: 10px;
+}
+
+/* Player */
+
+.player-box .player-skills .skill-box {
+    padding: 0;
+}
+
+.player-box .player-skills img {
+    width: 38px;
+}
+
+.player-full-skills {
+    margin-top: 20px;
+    height: 178px;
+    overflow-y: scroll;
+}
+
+.player-equip, .player-unequip {
+    font-weight: bold;
 }
