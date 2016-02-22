@@ -4,7 +4,7 @@ Pscion is a RPG style game designed for [Wintreath's Programming Challenge](http
 
 # Play Now
 
-...
+http://pscion.wuufu.co.uk/
 
 # Language / Libraries
 

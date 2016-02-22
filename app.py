@@ -268,3 +268,5 @@ if __name__ == '__main__':
     app.debug = True
     app.secret_key = str(uuid.uuid4())
     app.run()
+else:
+    app.secret_key = str(uuid.uuid4())
