@@ -1,3 +1,21 @@
+
+var locked = false;
+var combat = false;
+var combatmem = {};
+
+function setupLock() {
+    if (combat || locked) {
+        $("#travelModalRevealer").addClass('disabled');
+    } else if ($("#game").hasClass('active')) {
+        $("#travelModalRevealer").removeClass('disabled');
+    }
+}
+
+function executeLock( lock ) {
+    locked = lock;
+    setupLock();
+}
+
 function executeElementStatus( element, status ) {
     if (status) {
         $(element).fadeIn(250);
@@ -86,6 +104,116 @@ function executeActStatus( status ) {
     }
 }
 
+function executeStartCombat() {
+    combat = true;
+    setupLock();
+    $.ajax("/q/startcombat").done(function( html ) {
+        $("#content").fadeOut(400, function () {
+            $("#menu").find("a.active").each(function () {
+                $(this).removeClass("active");
+            });
+            $("#game").addClass("active").html('<i class="fa fa-crosshairs"></i><br/>Combat');
+            $("#content").html(html).fadeIn(400, function() {
+                $("#central.messages").scrollTop($('#central.messages').prop("scrollHeight"));
+                $(".skill-box").find('img').click(function() {
+                    if ($(this).hasClass('recharge')) return;
+                    $(".skill-box").find('img.selected').each(function() {
+                        $(this).removeClass('selected');
+                    });
+                    $(".skill-box").find('img.invalid').each(function() {
+                        $(this).removeClass('invalid');
+                    });
+                    $(this).closest(".row").find('img.active').each(function() {
+                        $(this).removeClass('active');
+                        delete combatmem[$(this).parent().attr('id')];
+                    });
+                    $(this).addClass('selected');
+                });
+                $(".combat-target").click(function() {
+                    var target = $(this).attr('id');
+                    $(".skill-box").find('img.selected').each(function() {
+                        $(this).removeClass('selected').addClass('active');
+                        combatmem[$(this).parent().attr('id')] = target;
+                    });
+                });
+                $("#turn-end").click(function() {
+                    console.log("TURN END");
+                    executeCombat(false);
+                });
+            });
+            setupPage();
+            executeLocaleAct();
+            if ($("#enemies-first").length > 0) {
+                executeCombat(true);
+            }
+        });
+    });
+}
+
+function executeCombat(enemies) {
+    var data = {};
+    if (!enemies) {
+        data = combatmem;
+    }
+    $.ajax('/q/combatact', {
+        type: 'POST',
+        data: data
+    }).done(function( data ) {
+        executeCommands(data["commands"], 0);
+    });
+}
+
+function executeCombatUpdate( updates ) {
+    console.log(updates);
+    for (var idx in updates) {
+        var update = updates[idx];
+        console.log("UPDATING");
+        console.log(update);
+        if (update['target'].substring(0, 5) == 'enemy') {
+            if (update['source'] == 'health' || update['source'] == 'energy') {
+                $("#" + update['target']).find(".enemy-" + update['source']).find(".progress")
+                    .attr("aria-valuenow", update['value'])
+                    .attr("aria-valuetext", update['percent'] + " percent " + update['source'])
+                    .find(".meter").css("width", update['percent'] + '%').find('.meter-text').text(update['percent'] + '%');
+            }
+        } else if (update['target'].substring(0, 6) == 'player') {
+            if (update['source'] == 'health' || update['source'] == 'energy') {
+                $("#" + update['target']).find(".player-" + update['source']).find(".progress")
+                    .attr("aria-valuenow", update['value'])
+                    .attr("aria-valuetext", update['value'] + " " + update['source'])
+                    .find(".meter").css("width", update['percent'] + '%').find('.meter-text').text(update['value']);
+            }
+        }
+    }
+    combatmem = {};
+}
+
+function executeEndCombat() {
+    combat = false;
+    $("#game").html('<i class="fa fa-gamepad"></i><br/>Game').trigger('click');
+    setTimeout(function() {
+        $.ajax("/q/endcombat").done(function( data ) {
+            if (data) {
+                executeCommands(data["commands"], 0);
+            }
+        });
+    }, 1000);
+}
+
+function executeCmsg( command ) {
+    if ("locked" in command) {
+        $("#" + command["locked"]).find('img').removeClass('active').addClass('locked');
+    } if ("recharge" in command) {
+        $("#" + command["recharge"]).find('img').removeClass('active').removeClass('locked').addClass('recharge');
+    } if ("recharged" in command) {
+        $("#" + command["recharged"]).find('img').removeClass('active').removeClass('locked').removeClass('recharge');
+    } if ("errors" in command) {
+        for (var idx in command["errors"]) {
+            $("#" + command["errors"][idx]).find('img').removeClass('active').addClass('invalid');
+        }
+    }
+}
+
 function executeMsg( sender, msg, eclass ) {
     if ($("#central.messages").length) {
         var html = '<div class="message ' + eclass + '">';
@@ -107,11 +235,13 @@ function executeCommands(commands, index) {
             executeElementStatus(command["element"], command["status"]);
         } else if (command["type"] == "responses") {
             executeResponses(command["responses"]);
-        } else if (command["type"] == "msg") {
+        } else if (command["type"] == "msg" || command["type"] == "cmsg") {
             if ("eclass" in command) {
                 executeMsg(command["sender"], command["msg"], command["eclass"]);
             } else {
                 executeMsg(command["sender"], command["msg"], "");
+            } if (command["type"] == "cmsg") {
+                executeCmsg(command);
             }
         } else if (command["type"] == "localeact") {
             executeLocaleAct();
@@ -121,6 +251,15 @@ function executeCommands(commands, index) {
             $("#travelModalRevealer").find("span").text(command["name"]);
         } else if (command["type"] == "actbarstatus") {
             executeActStatus(command["status"]);
+        } else if (command["type"] == "combat") {
+            executeStartCombat();
+        } else if (command["type"] == "combatupdate") {
+            executeCombatUpdate(command["updates"]);
+        } else if (command["type"] == "combaterr") {
+            executeCmsg(command);
+            executeMsg("", command["msg"], "invalid");
+        } else if (command["type"] == "lock") {
+            executeLock(command["lock"])
         }
 
         if ("time" in command && command["time"] > 0) {
@@ -136,6 +275,7 @@ function executeCommands(commands, index) {
 }
 
 function setupPage() {
+    setupLock();
     var action = $("#action-select");
     if (action.length) {
         action.selectize({
@@ -212,6 +352,7 @@ jQuery(document).ready(function () {
     $("#central.messages").scrollTop($('#central.messages').prop("scrollHeight"));
 
     $("#menu").find("a").click(function () {
+        if (combat || locked) return;
         var id = $(this).attr("id");
         $.ajax("/q/menu", {
             type: "GET",
@@ -234,6 +375,9 @@ jQuery(document).ready(function () {
     });
 
     $("#travelModalRevealer").click(function() {
+        if ($(this).hasClass('disabled')) {
+            return;
+        }
         $("#travelModal").foundation('reveal', 'open');
     });
     var travel = $("#travel-select").selectize();

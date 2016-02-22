@@ -50,21 +50,23 @@ class Skill(database.BaseModel):
 
     def _encode_str(self, player, des, target=None, dealt=0):
         adict = self._unpack()
-        des.replace('[s]', '<span class="skill-sender">%s</span>' % player.name)
+        start = '<span class="cmsg-sender">%s</span> uses <span class="cmsg-skill">%s</span>' \
+                % (player.name, self.name)
+        des = des.replace('[s]', '<span class="cmsg-sender">%s</span>' % player.name)
         if target:
-            des = des.replace('[t]', '<span class="skill-target">%s</span>' % target.name)
-            des = des.replace('[d]', '<span class="skill-dealt">%d</span>' % dealt)
+            des = des.replace('[t]', '<span class="cmsg-target">%s</span>' % target.name)
+            des = des.replace('[d]', '<span class="cmsg-dealt">%d</span>' % dealt)
         elif 'd' in adict:
             dmg = self.damage(player, adict)
             dmsplit = dmg.split("|")
             if len(dmsplit) == 2:
-                des = des.replace('[d]', '<span class="skill-dmg">%d..%d</span>' %
+                des = des.replace('[d]', '<span class="cmsg-dmg">%d..%d</span>' %
                                   (int(dmsplit[0]), int(dmsplit[1])))
             else:
-                des = des.replace('[d]', '<span class="skill-dmg">%d</span>' % int(dmsplit[0]))
+                des = des.replace('[d]', '<span class="cmsg-dmg">%d</span>' % int(dmsplit[0]))
         if 'cn' in adict:
-            des = des.replace('[cn]', '<span class="skill-cn">%d</span>' % int(adict['cn']))
-        return des
+            des = des.replace('[cn]', '<span class="cmsg-cn">%d</span>' % int(adict['cn']))
+        return "%s! %s" % (start, des)
 
     def description_str(self, player):
         """
@@ -93,8 +95,8 @@ class Skill(database.BaseModel):
         adict = self._unpack() if not adict else adict
         if 'd' in adict:
             d = float(adict['d'])
-            if 'di' in adict and player.charlevel > 1:
-                l = player.charlevel - 1
+            if 'di' in adict and player.level > 1:
+                l = player.level - 1
                 d = math.floor(d + (l * float(adict['di'])))
             if 'dd' in adict:
                 db = d - float(adict['dd'])
@@ -112,14 +114,14 @@ class Skill(database.BaseModel):
         """
         adict = self._unpack() if not adict else adict
         if 'ei' in adict:
-            l = player.charlevel - 1
+            l = player.level - 1
             return math.floor(float(self.energy) + (l * float(adict['ei'])))
         return self.energy
 
     def precast(self, caster):
         """
         :param caster: The object representing the caster of the skill
-        :return: A result indicating how many turns you gotta wait to use the kill
+        :return: A result indicating how many turns it takes to cast the skill
         """
         return self.time
 
@@ -166,6 +168,12 @@ class Skill(database.BaseModel):
         """
         return self.recharge
 
+    def recharged_str(self):
+        """
+        :return: A string to indicate that the skill has recharged
+        """
+        return "%s has recharged again!" % self.name
+
 
 if not Skill.table_exists():
     Skill.create_table(fail_silently=True)
@@ -173,23 +181,23 @@ if not Skill.table_exists():
     # Standard
     Skill.create(cclass=None, name="Attack", image="st-attack.png", energy=1, time=0, recharge=1,
                  action="t:e;d:5;di:0.2;ei:0.1", description="Your standard attack for [d] damage.",
-                 actiondescription="[s] attack [t] with your weapon doing [d] damage!")
+                 actiondescription="[s] attacks [t] with their weapon doing [d] damage!")
     Skill.create(cclass=None, name="Resurrect", image="st-resurrect.png", description="Resurrect downed ally.",
-                 energy=5, time=1, recharge=-1, action="t:a;s:r;hp:50", actiondescription="You resurrect [t].")
+                 energy=5, time=1, recharge=-1, action="t:a;s:r;hp:50", actiondescription="[s] resurrects [t].")
 
     # Gunslinger
     Skill.create(cclass=1, name="Charged Shot", image="gs-charged.png", energy=2, time=1, recharge=2,
                  action="t:e;d:12;di:0.3;dd:2;ei:0.2", description="A charged shot for [d] damage.",
-                 actiondescription="[s] hit [t] with a charged bolt for [d] damage.",
+                 actiondescription="[s] hits [t] with a charged bolt for [d] damage.",
                  precastdescription="[s] is charging their gun for a shot!")
     Skill.create(cclass=1, name="Rapid Fire", image="gs-rapid.png", energy=2, time=0, recharge=1,
-                 action="t:e;d:4;di:0.2;dd:2;ei:0.2", description="Shoot three rapid fire bullets for [d] damage each.",
-                 actiondescription="[s] hit [t] with three bolts doing [d1], [d2] and [d3] damage.")
+                 action="t:e;d:4;di:0.2;dd:2;ei:0.2", description="Shoots three rapid fire bullets for [d] damage each.",
+                 actiondescription="[s] hits [t] with three bolts doing [d1], [d2] and [d3] damage.")
     Skill.create(cclass=1, name="Disrupting Blast", image="gs-disrupt.png", energy=1, time=0, recharge=1,
                  action="t:e;d:3;di:0.2;ei:0.2;c:dazed;cn:1;ci:0.1",
                  description="Disrupt target dealing [d] damage and Daze for [cn] turns.",
-                 actiondescription="[s] hit [t] for [d] damage and cause Daze for [cn] turns.")
+                 actiondescription="[s] hits [t] for [d] damage and cause Daze for [cn] turns.")
     Skill.create(cclass=1, name="Piercing Shot", image="gs-piercing.png", energy=2, time=0, recharge=2,
                  action="t:e;d:10;dd:2;di:0.3;ei:0.2;c:bleed;cn:1;ci:0.2",
                  description="Pierce target dealing [d] damage and Bleeding for [cn] turns.",
-                 actiondescription="[s] hit [t] for [d] damage and causing Bleeding for [cn] turns.")
+                 actiondescription="[s] hits [t] for [d] damage and causing Bleeding for [cn] turns.")

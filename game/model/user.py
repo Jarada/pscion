@@ -10,6 +10,7 @@ Over models, such as the Inventory and Companions, will reference what we have h
 
 from peewee import BooleanField, CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField
 from game.model import database, cclass, skill
+import hashlib
 
 
 class User(database.BaseModel):
@@ -18,15 +19,15 @@ class User(database.BaseModel):
     password = CharField()
     sesskey = CharField()
     name = CharField(null=True)
-    charpclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playerprimary")
-    charsclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playersecondary")
-    charlevel = IntegerField(default=1)
-    charexp = IntegerField(default=0)
-    chargold = IntegerField(default=0)
-    charhealth = IntegerField(default=200)
-    charmaxhealth = IntegerField(default=200)
-    charenergy = IntegerField(default=10)
-    charmaxenergy = IntegerField(default=10)
+    pclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playerprimary")
+    sclass = ForeignKeyField(cclass.CharacterClass, null=True, related_name="playersecondary")
+    level = IntegerField(default=1)
+    exp = IntegerField(default=0)
+    gold = IntegerField(default=0)
+    health = IntegerField(default=200)
+    maxhealth = IntegerField(default=200)
+    energy = IntegerField(default=10)
+    maxenergy = IntegerField(default=10)
     gamemajor = IntegerField(default=0)
     gameminor = IntegerField(default=0)
     gamestate = IntegerField(default=0)
@@ -83,13 +84,13 @@ class User(database.BaseModel):
         """
         :return: The percentage health of the user
         """
-        return int((float(self.charhealth) / float(self.charmaxhealth)) * 100)
+        return int((float(self.health) / float(self.maxhealth)) * 100)
 
     def energy_percent(self):
         """
         :return: The percentage energy of the user
         """
-        return int((float(self.charenergy) / float(self.charmaxenergy)) * 100)
+        return int((float(self.energy) / float(self.maxenergy)) * 100)
 
     def skill(self, slot):
         """
@@ -108,14 +109,15 @@ class User(database.BaseModel):
         result = self.skills.select(UserSkill, skill.Skill).join(skill.Skill)
         output = []
         for sk in result:
-            if ((sk.skill.cclass is None or sk.skill.cclass == self.charpclass) and sk.skill.primary == True) or \
-                    (sk.skill.cclass == self.charsclass and sk.skill.primary == False):
+            if ((sk.skill.cclass is None or sk.skill.cclass == self.pclass) and sk.skill.primary == True) or \
+                    (sk.skill.cclass == self.sclass and sk.skill.primary == False):
                 output.append(sk)
         return output
 
     def equip(self, upid, slot):
         """
-        :param slot: The skill to equip
+        :param upid: The skill to equip
+        :param slot: The slot to put the skill
         :return: If the equip was successful
         """
         try:
@@ -134,7 +136,7 @@ class User(database.BaseModel):
 
     def unequip(self, upid):
         """
-        :param slot: The skill to unequip
+        :param upid: The skill to unequip
         :return: If the unequip was successful
         """
         skill = self.skills.select().where(UserSkill.pid == upid).get()
@@ -230,7 +232,7 @@ class UserSkill(database.BaseModel):
 
 if not User.table_exists():
     User.create_table(fail_silently=True)
-    User.create(username="Wuufu", password="blah", sesskey="", name="Wuufu", charpclass=1)
+    User.create(username="Wuufu", password=hashlib.md5(b"blah").hexdigest(), sesskey="", name="Wuufu", pclass=1)
 if not UserFlag.table_exists():
     UserFlag.create_table(fail_silently=True)
 if not UserLog.table_exists():
@@ -238,4 +240,7 @@ if not UserLog.table_exists():
 if not UserSkill.table_exists():
     UserSkill.create_table(fail_silently=True)
     for sk in skill.Skill.select():
-        UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk)
+        if sk.pid == 1 or sk.pid == 2:
+            UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk, equipped=sk.pid)
+        else:
+            UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk)

@@ -1,0 +1,59 @@
+{% set player = combat.player %}
+{% set enemies = combat.enemies.enemies %}
+<div class="large-12 columns central-wrap combat" id="enemies">
+    {% if enemies|length == 1 %}
+    <div class="row">
+        <div class="columns large-4">&nbsp;</div>
+        {% for enemy in enemies %}
+        <div class="columns large-4" id="enemy-{{ loop.index }}">
+            {% include "parts/combat-enemy.html" %}
+        </div>
+        {% endfor %}
+        <div class="columns large-4">&nbsp;</div>
+    </div>
+    {% endif %}
+    {% if enemies|length == 2 %}
+    <div class="row">
+        <div class="columns large-2">&nbsp;</div>
+        {% for enemy in enemies %}
+        <div class="columns large-4" id="enemy-{{ loop.index }}">
+            {% include "parts/combat-enemy.html" %}
+        </div>
+        {% endfor %}
+        <div class="columns large-2">&nbsp;</div>
+    </div>
+    {% endif %}
+    {% if enemies|length == 3 %}
+    <div class="row">
+        {% for enemy in enemies %}
+        <div class="columns large-4" id="enemy-{{ loop.index }}">
+            {% include "parts/combat-enemy.html" %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="large-12 columns central-wrap combat" id="combat">
+    <div id="central" class="box messages">
+        {% if combat.enemies.first %}
+        <div id="enemies-first" style="display: none;"></div>
+        {% endif %}
+        {% for message in combat.start() %}
+        <div class="message {% if message.eclass %}{{ message.eclass }}{% endif %}">
+            {{ message.msg }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="large-12 columns central-wrap combat" id="player">
+    <div class="row">
+        <div class="columns large-4">&nbsp;</div>
+        <div class="columns large-4">
+            {% set pmode = 'combat' %}
+            {% include 'parts/player.html' %}
+        </div>
+        <div class="columns large-4">&nbsp;</div>
+    </div>
+</div>

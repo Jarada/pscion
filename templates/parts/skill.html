@@ -1,4 +1,4 @@
-<div class="skill-filled">
+<div class="skill-filled" {% if indexx %}id="{{ indexx }}"{% endif %}>
     <img src="{{ url_for('static', filename='app/img/skills/' + skill.image) }}" alt="{{ skill.name }}" />
     {% if equipped is defined %}
     {% if equipped > 0 %}

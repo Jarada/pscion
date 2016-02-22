@@ -29,6 +29,11 @@ class Wait(Command):
         super().__init__({"type": "wait", "time": time})
 
 
+class LockUI(Command):
+    def __init__(self, lock):
+        super().__init__({"type": "lock", "lock": lock})
+
+
 class LoadCentralContent(Command):
     def __init__(self, template):
         super().__init__({"type": "central", "html": render_template(template)})
@@ -94,8 +99,31 @@ class StartCombat(Command):
 
 class CombatMessage(Command):
     def __init__(self, msg, eclass=None):
-        super().__init__({"type": "cmsg", "msg": msg})
+        super().__init__({"type": "cmsg", "msg": msg, "time": 600})
         self.msg = msg
         self.eclass = eclass
         if eclass:
             self.json["eclass"] = eclass
+
+    def locked(self, locked):
+        self.json["locked"] = locked
+
+    def recharging(self, recharge):
+        self.json["recharge"] = recharge
+
+    def recharged(self, recharged):
+        self.json["recharged"] = recharged
+
+
+class CombatUpdate(Command):
+    def __init__(self):
+        super().__init__({"type": "combatupdate", "updates": []})
+
+    def add_update(self, target, source, value, percent):
+        self.json["updates"].append({"target": target, "source": source, "value": value, "percent": percent})
+
+
+class CombatError(Command):
+    def __init__(self, errors):
+        super().__init__({"type": "combaterr", "errors": errors,
+                          "msg": "One or more skills have invalid targets. Please fix these and try again."})

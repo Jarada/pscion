@@ -2,19 +2,19 @@
     <div class="row column character-form">
         <h4 class="text-center">Register - Character</h4>
         <label>Character Name
-            <input type="text" name="name" placeholder="Character Name">
+            <input type="text" name="name" id="name" placeholder="Character Name">
         </label>
         <label>Character Class
-            <select name="class">
+            <select name="class" id="class">
                 {% for class in classes %}
-                    <option value="{{ class.pid }}">{{ class.name }} - {{ class.description }}</option>
+                    <option value="{{ class.pid }}" {% if class.pid != 1 %}disabled{% endif %}>{{ class.name }} - {{ class.description }}</option>
                 {% endfor %}
             </select>
         </label>
-        <input type="hidden" name="user" value="{{ user.pid }}" />
-        <input type="hidden" name="key" value="{{ user.sesskey }}" />
+        <input type="hidden" name="user" id="user" value="{{ user.pid }}" />
+        <input type="hidden" name="key" id="sesskey" value="{{ user.sesskey }}" />
         <p style="margin-bottom: 0px;">
-            <a type="submit" class="button expanded">Finish Registration</a>
+            <a type="submit" class="button expanded" id="finish">Finish Registration</a>
         </p>
         <p class="text-center forgot-password"><a href="#" target="_blank">Login?</a></p>
     </div>

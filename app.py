@@ -13,9 +13,10 @@ fast deployment of web services. Feel free to browse below; most things are
 self explanatory but I've added comments where I feel they'll benefit.
 """
 
-from flask import Flask, abort, jsonify, render_template, request
+from flask import Flask, abort, jsonify, render_template, redirect, request, session, url_for
+from game.combat.combat import Combat
 from game.model import user, cclass
-from game.story import story
+from game.story import story, tutorial
 import game.story.load as sload
 import game.locations.load as lload
 import uuid
@@ -27,11 +28,15 @@ app = Flask(__name__)
 gstory = story.Story()
 sload.load(gstory)
 lload.load(gstory)
-playeri = user.User.get(user.User.pid == 1)
 
 
 def player():
-    return playeri
+    if 'userid' in session and 'sesskey' in session:
+        try:
+            return user.User.get(user.User.pid == session['userid'], user.User.sesskey == session['sesskey'])
+        except:
+            pass
+    return None
 
 
 def element():
@@ -46,17 +51,52 @@ def location():
 # In this case, it's the root directory, or pscion.wuufu.co.uk.
 @app.route('/')
 def index():
-    # Return Login Page
-    # return render_template("login.html")
-    e = element()
-    l = location()
-    return render_template("game.html", player=player(), content="layouts/%s" % e.default, element=e, location=l)
+    p = player()
+    if p:
+        # Return Game Page
+        e = element()
+        l = location()
+        return render_template("game.html", player=player(), content="layouts/%s" % e.default, element=e, location=l)
+    else:
+        # Return Login Page
+        return render_template("login.html")
 
 
 @app.route('/q/logintemp')
 def login_temp():
     # Return Login Form
     return render_template("parts/login-login.html")
+
+
+@app.route('/q/login', methods=['POST'])
+def login():
+    # Check login
+    if 'username' in request.form and 'password' in request.form:
+        print(request.form)
+        try:
+            p = user.User.get(user.User.username == request.form['username'],
+                              user.User.password == request.form['password'])
+            print(p)
+            p.sesskey = str(uuid.uuid4())
+            print(p)
+            p.save()
+            print(p)
+            session['userid'] = p.pid
+            print(type(p.pid).__name__)
+            session['sesskey'] = str(p.sesskey)
+            print(type(p.sesskey).__name__)
+            return '', 200
+        except Exception as e:
+            print(e)
+            pass
+    return abort(403)
+
+
+@app.route('/logout')
+def logout():
+    # Set Logout
+    session.clear()
+    return redirect(url_for('index'))
 
 
 @app.route('/q/registertemp')
@@ -76,7 +116,7 @@ def register():
     password = request.form['password']
     # We create the user with a sesskey; a unique identifier that is used to identify the user
     # in the registration process from here on out
-    query = user.User.create(username=name, password=password, sesskey=uuid.uuid4())
+    query = user.User.create(username=name, password=password, sesskey=str(uuid.uuid4()))
     if query:
         # We return the next part of the registration process with the user, and all available
         # classes to choose from
@@ -93,14 +133,18 @@ def register_fin():
         query = user.User.get(user.User.pid == request.form['user'])
         if query.sesskey == request.form['sesskey']:
             query.character = request.form['name']
-            query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['class'])
-            query.sesskey = uuid.uuid4()
+            query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['cclass'])
+            query.sesskey = str(uuid.uuid4())
             query.save()
 
             # Alright we're good! Let's login!
+            session['userid'] = query.pid
+            session['sesskey'] = query.sesskey
+            return '', 200
         else:
             raise ValueError("Invalid Sesskey")
-    except:
+    except Exception as e:
+        print(e)
         return abort(500)
 
 
@@ -181,6 +225,26 @@ def travel():
     return '', 200
 
 
+@app.route('/q/startcombat')
+def start_combat():
+    p = player()
+    e = element()
+    combat = Combat(p, e.combat(p))
+    if isinstance(e, tutorial.Tutorial):
+        combat.tutorial = True
+    gstory.combat[p.sesskey] = combat
+    return render_template("layouts/combat.html", player=p, element=element(), location=location(),
+                           combat=combat)
+
+
+@app.route('/q/combatact', methods=['POST'])
+def combatact():
+    p = player()
+    c = gstory.combat[p.sesskey]
+    print(request.form)
+    return jsonify(**{"commands": c.act_turn(request.form)})
+
+
 @app.route('/q/pequip', methods=['POST'])
 def pequip():
     args = request.form['skill'].split('-')
@@ -202,4 +266,5 @@ def punequip():
 # The __main__ check means it only runs if this file is the entry point of the program.
 if __name__ == '__main__':
     app.debug = True
+    app.secret_key = str(uuid.uuid4())
     app.run()

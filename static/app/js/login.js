@@ -1,5 +1,8 @@
 function setuplogin() {
     // We set click handlers on the Login Form
+    $("#sidebar").find(".login-button").click(function() {
+        login();
+    });
     $("#sidebar").find(".register-button").click(function() {
         loadreg();
     });
@@ -16,6 +19,22 @@ function loadlogin() {
             sidebar.fadeIn(1500);
             setuplogin();
         });
+    });
+}
+
+function login() {
+    // Let's login
+    $(".login-form").removeClass('error');
+    $.ajax("/q/login", {
+        type: "POST",
+        data: {
+            username: $("#username").find("input").val(),
+            password: $.md5($("#password").find("input").val())
+        }
+    }).done(function() {
+        location.reload();
+    }).fail(function() {
+        $(".login-form").addClass('error');
     });
 }
 
@@ -54,6 +73,19 @@ function continuereg() {
             sidebar.fadeIn(1500);
             sidebar.find(".login-link").click(function() {
                loadlogin();
+            });
+            sidebar.find("#finish").click(function() {
+                $.ajax('/q/registerfin', {
+                    type: "POST",
+                    data: {
+                        user: $("#user").val(),
+                        name: $("#name").val(),
+                        sesskey: $("#sesskey").val(),
+                        cclass: $("#class").find(":selected").val()
+                    }
+                }).done(function() {
+                    location.reload();
+                });
             });
         });
     }).fail(function(xhr) {

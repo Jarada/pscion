@@ -3,7 +3,7 @@
         <div class="box inventory">
             <div class="player-name">
                 {{ player.name }}'s Inventory
-                <div class="player-money"><i class="fa fa-money"></i> {{ player.chargold }}</div>
+                <div class="player-money"><i class="fa fa-money"></i> {{ player.gold }}</div>
             </div>
             {% set items = player.items %}
             {% for i in range(0, 5) %}

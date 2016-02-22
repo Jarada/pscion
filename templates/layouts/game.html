@@ -22,40 +22,7 @@
                 </select>
             </div>
         </div>
-        <div class="player-box box">
-            <div class="player-name">{{ player.name }}</div>
-            <div class="player-class">{{ player.charpclass.name }}{% if player.charsclass %} / {{ player.charsclass.name }}{% endif %}</div>
-            <div class="row">
-                <div class="player-health columns large-6">
-                    <div class="success progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.charhealth }}" aria-valuemax="{{ player.charmaxhealth }}" aria-valuetext="{{ player.charmaxhealth }} health">
-                        <span class="meter" style="width: {{ player.health_percent() }}%">
-                            <p class="meter-text">{{ player.charmaxhealth }}</p>
-                        </span>
-                    </div>
-                </div>
-                <div class="player-energy columns large-6">
-                    <div class="progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.charenergy }}" aria-valuemax="{{ player.charmaxenergy }}" aria-valuetext="{{ player.charmaxenergy }} energy">
-                        <span class="meter" style="width: {{ player.energy_percent() }}%">
-                            <p class="meter-text">{{ player.charmaxenergy }}</p>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="player-skills row">
-                <div class="columns large-2">&nbsp;</div>
-                {% for i in range(1,5) %}
-                <div class="skill-box columns large-2">
-                {% set uskill = player.skill(i) %}
-                {% if uskill %}
-                {% set skill = uskill.skill %}
-                    {% include "parts/skill.html" %}
-                {% else %}
-                    &nbsp;
-                {% endif %}
-                </div>
-                {% endfor %}
-                <div class="columns large-2">&nbsp;</div>
-            </div>
-        </div>
+        {% set pmode = 'game' %}
+        {% include 'parts/player.html' %}
     </div>
 </div>

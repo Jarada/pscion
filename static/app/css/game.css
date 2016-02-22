@@ -76,6 +76,11 @@ p.meter-text {
     float: right;
 }
 
+#travelModalRevealer.disabled {
+    color: rgb(128, 128, 128);
+    cursor: default;
+}
+
 #travelModal {
     background-color: #4C5D84;
 }
@@ -135,7 +140,7 @@ p.meter-text {
     top: 6px;
 }
 
-.player-name, .skills-title {
+.player-name, .enemy-name, .skills-title {
     padding: 2px 10px;
     font-weight: bold;
     background-color: #eee;
@@ -280,4 +285,61 @@ p.meter-text {
 
 .player-equip, .player-unequip {
     font-weight: bold;
+}
+
+/* Combat */
+
+#enemies, #combat {
+    padding-bottom: 10px;
+}
+
+#combat #central {
+    height: 200px;
+}
+
+.combat-target {
+    position: absolute;
+    left: 48%;
+    margin-top: 5px;
+    color: crimson;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#turn-end {
+    float: right;
+    color: crimson;
+    cursor: pointer;
+}
+
+.combat .skill-box img {
+    cursor: pointer;
+}
+
+.skill-box img.selected {
+    border: 2px inset lightgreen;
+    border-radius: 10px;
+}
+
+.skill-box img.active {
+    border: 2px inset cadetblue;
+    border-radius: 10px;
+}
+
+.skill-box img.locked {
+    border: 2px inset darkorchid;
+    border-radius: 10px;
+    cursor: default;
+}
+
+.skill-box img.invalid {
+    border: 2px inset red;
+    border-radius: 10px;
+}
+
+.skill-box img.recharge {
+    border: 2px inset darkred;
+    border-radius: 10px;
+    opacity: .5;
+    cursor: default;
 }

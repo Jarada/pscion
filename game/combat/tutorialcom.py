@@ -17,8 +17,13 @@ class BullyEnemy(Enemy):
         ])
 
     def action(self, player):
+        """
+        :param player: The player object
+        :return: The results of the enemy acting
+        """
         if self.energy > 1:
+            if random.randint(0, 10) == 0:
+                return self.rest()
             attack = random.choice(self.attacks)
             return attack.cast(self, player)
-        elif self.energy == 0:
-            return self.rest()
+        return self.rest()

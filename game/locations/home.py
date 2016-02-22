@@ -68,7 +68,7 @@ class Home(location.Location):
                     UpdateLocationActions()]
         if item == "chip":
             player.add_flag(0, 0, 2, "pchip")
-            player.chargold += 200
+            player.gold += 200
             player.save()
             return [SendMessage("", "You pickup the Credit chip and gain 200 credits.", 0),
                     UpdateLocationActions()]

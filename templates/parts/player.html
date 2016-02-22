@@ -1,0 +1,41 @@
+<div class="{% if pmode == 'char' %}character player-full-box{% else %}player-box{% endif %} box">
+    <div class="player-name">
+        {{ player.name }}
+        {% if pmode == 'combat' %}<span id="turn-end"><i class="fa fa-hourglass-end"></i></span>{% endif %}
+    </div>
+    <div class="player-class">{{ player.pclass.name }}{% if player.sclass %} / {{ player.sclass.name }}{% endif %}</div>
+    <div class="row">
+        {% if pmode == 'combat' %}<i class="fa fa-crosshairs combat-target" id="target-player"></i>{% endif %}
+        <div class="player-health columns large-6">
+            <div class="success progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.health }}" aria-valuemax="{{ player.maxhealth }}" aria-valuetext="{{ player.health }} health">
+                <span class="meter" style="width: {{ player.health_percent() }}%">
+                    <p class="meter-text">{{ player.health }}</p>
+                </span>
+            </div>
+        </div>
+        <div class="player-energy columns large-6">
+            <div class="progress" role="progressbar" tabindex="0" aria-valuemin="0" aria-valuenow="{{ player.energy }}" aria-valuemax="{{ player.maxenergy }}" aria-valuetext="{{ player.energy }} energy">
+                <span class="meter" style="width: {{ player.energy_percent() }}%">
+                    <p class="meter-text">{{ player.energy }}</p>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="player-skills row">
+        {% if not pmode == 'char' %}<div class="columns large-2">&nbsp;</div>{% endif %}
+        {% for i in range(1,5) %}
+        <div class="skill-box columns {% if pmode == 'char' %}large-3{% else %}large-2{% endif %}">
+        {% set uskill = player.skill(i) %}
+        {% if uskill %}
+        {% set skill = uskill.skill %}
+            {% if pmode == 'char' %}{% set equipped = uskill.equipped %}{% endif %}
+            {% if pmode == 'combat' %}{% set indexx = "skill-player-" ~ i %}{% endif %}
+            {% include "parts/skill.html" %}
+        {% else %}
+            &nbsp;
+        {% endif %}
+        </div>
+        {% endfor %}
+        {% if not pmode == 'char' %}<div class="columns large-2">&nbsp;</div>{% endif %}
+    </div>
+</div>

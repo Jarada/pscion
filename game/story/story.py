@@ -35,6 +35,9 @@ class StoryElement:
     def respond(self, player, response):
         return StoryPass([])
 
+    def combat(self, player):
+        return None
+
 
 class StoryAdvancement:
     def __init__(self, major, minor, state, args, commands=None):
@@ -61,6 +64,7 @@ class Story:
     def __init__(self):
         self.story = {}
         self.locations = {}
+        self.combat = {}
 
     def add(self, major, minor, state, element):
         self.story["%d.%d:%d" % (major, minor, state)] = element
