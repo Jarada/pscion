@@ -99,9 +99,9 @@ class TutorialThree(Tutorial):
     def __init__(self, player):
         super().__init__(3, [
             command.SetActionBarStatus(False),
-            command.SendMessage("Zaphyr", "You made it out your home! There's promise for you yet.", 400, "zaphyr"),
-            command.SendMessage("Zaphyr", "Maybe today you'll even win against the bully who waits outside to whack you on the head.", 500, "zaphyr"),
-            command.SendMessage("Zaphyr", "Ah well, let's see who wins today...", 200, "zaphyr"),
+            command.SendMessage("Zaphyr", "You made it out your home! There's promise for you yet.", 4000, "zaphyr"),
+            command.SendMessage("Zaphyr", "Maybe today you'll even win against the bully who waits outside to whack you on the head.", 5000, "zaphyr"),
+            command.SendMessage("Zaphyr", "Ah well, let's see who wins today...", 2000, "zaphyr"),
             command.StartCombat()
         ])
 

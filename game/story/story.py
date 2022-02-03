@@ -27,6 +27,8 @@ class StoryElement:
         for command in self.commands:
             command.log(player)
             output["commands"].append(command.json)
+        print("OUTPUT")
+        print(output)
         return output
 
     def execute(self, player, action, output=None):

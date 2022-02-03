@@ -15,6 +15,7 @@ fight.
 
 import math, random
 from peewee import BooleanField, CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField
+from game.combat.damage import Damage
 from game.model import database, cclass
 
 
@@ -48,14 +49,15 @@ class Skill(database.BaseModel):
             actdict[keyvaluesplit[0]] = keyvaluesplit[1]
         return actdict
 
-    def _encode_str(self, player, des, target=None, dealt=0):
+    def _encode_str(self, player, des, target=None, dealt=Damage(0)):
         adict = self._unpack()
-        start = '<span class="cmsg-sender">%s</span> uses <span class="cmsg-skill">%s</span>' \
-                % (player.name, self.name)
         des = des.replace('[s]', '<span class="cmsg-sender">%s</span>' % player.name)
         if target:
             des = des.replace('[t]', '<span class="cmsg-target">%s</span>' % target.name)
-            des = des.replace('[d]', '<span class="cmsg-dealt">%d</span>' % dealt)
+            des = des.replace('[d]', '<span class="cmsg-dealt">%d</span>' % dealt.total())
+            des = des.replace('[d1]', '<span class="cmsg-dealt">%d</span>' % dealt.get(0))
+            des = des.replace('[d2]', '<span class="cmsg-dealt">%d</span>' % dealt.get(1))
+            des = des.replace('[d3]', '<span class="cmsg-dealt">%d</span>' % dealt.get(2))
         elif 'd' in adict:
             dmg = self.damage(player, adict)
             dmsplit = dmg.split("|")
@@ -66,7 +68,7 @@ class Skill(database.BaseModel):
                 des = des.replace('[d]', '<span class="cmsg-dmg">%d</span>' % int(dmsplit[0]))
         if 'cn' in adict:
             des = des.replace('[cn]', '<span class="cmsg-cn">%d</span>' % int(adict['cn']))
-        return "%s! %s" % (start, des)
+        return des
 
     def description_str(self, player):
         """
@@ -137,14 +139,18 @@ class Skill(database.BaseModel):
         """
         :param caster: The object representing the caster of the skill
         :param adict: The unpacked dictionary to prevent unnecessary unpacking
-        :return: The number of damage done randomly chosen with available guidelines
+        :return: A Damage object providing the number of damage done randomly chosen with available guidelines
         """
         dmg = self.damage(caster, adict)
         dmsplit = dmg.split("|")
-        if len(dmsplit) == 2:
-            return random.randint(int(dmsplit[0]), int(dmsplit[1]))
-        else:
-            return int(dmsplit[0])
+        result = Damage()
+        count = adict['dc'] if 'dc' in adict else 1
+        for i in range(0, count):
+            if len(dmsplit) == 2:
+                result.add(random.randint(int(dmsplit[0]), int(dmsplit[1])))
+            else:
+                result.add(int(dmsplit[0]))
+        return result
 
     def cast(self, caster, target):
         """
@@ -157,9 +163,11 @@ class Skill(database.BaseModel):
         adict = self._unpack()
         dealt = self.cast_damage(caster, adict)
         caster.energy -= self.total_energy(caster, adict)
-        target.health -= dealt
+        target.health -= dealt.total()
         des = str(self.actiondescription)
-        return self._encode_str(caster, des, target, dealt)
+        start = '<span class="cmsg-sender">%s</span> uses <span class="cmsg-skill">%s</span>' \
+                % (caster.name, self.name)
+        return self._encode_str(caster, "%s! %s" % (start, des), target, dealt)
 
     def postcast(self, caster):
         """
@@ -191,7 +199,8 @@ if not Skill.table_exists():
                  actiondescription="[s] hits [t] with a charged bolt for [d] damage.",
                  precastdescription="[s] is charging their gun for a shot!")
     Skill.create(cclass=1, name="Rapid Fire", image="gs-rapid.png", energy=2, time=0, recharge=1,
-                 action="t:e;d:4;di:0.2;dd:2;ei:0.2", description="Shoots three rapid fire bullets for [d] damage each.",
+                 action="t:e;d:4;di:0.2;dd:2;dc:3;ei:0.2",
+                 description="Shoots three rapid fire bullets for [d] damage each.",
                  actiondescription="[s] hits [t] with three bolts doing [d1], [d2] and [d3] damage.")
     Skill.create(cclass=1, name="Disrupting Blast", image="gs-disrupt.png", energy=1, time=0, recharge=1,
                  action="t:e;d:3;di:0.2;ei:0.2;c:dazed;cn:1;ci:0.1",

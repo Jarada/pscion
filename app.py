@@ -31,11 +31,18 @@ lload.load(gstory)
 
 
 def player():
+    print(session)
     if 'userid' in session and 'sesskey' in session:
+        print("P1")
         try:
-            return user.User.get(user.User.pid == session['userid'], user.User.sesskey == session['sesskey'])
+            print("P2")
+            u = user.User.get(user.User.pid == session['userid'], user.User.sesskey == session['sesskey'])
+            print("P3")
+            print(u)
+            return u
         except:
             pass
+    print("PF")
     return None
 
 
@@ -55,7 +62,9 @@ def index():
     if p:
         # Return Game Page
         e = element()
+        print(e)
         l = location()
+        print(l)
         return render_template("game.html", player=player(), content="layouts/%s" % e.default, element=e, location=l)
     else:
         # Return Login Page
@@ -72,22 +81,15 @@ def login_temp():
 def login():
     # Check login
     if 'username' in request.form and 'password' in request.form:
-        print(request.form)
         try:
             p = user.User.get(user.User.username == request.form['username'],
                               user.User.password == request.form['password'])
-            print(p)
             p.sesskey = str(uuid.uuid4())
-            print(p)
             p.save()
-            print(p)
             session['userid'] = p.pid
-            print(type(p.pid).__name__)
             session['sesskey'] = str(p.sesskey)
-            print(type(p.sesskey).__name__)
             return '', 200
         except Exception as e:
-            print(e)
             pass
     return abort(403)
 
@@ -110,9 +112,13 @@ def register():
     # Register User
     name = request.form['username']
     query = user.User.select().where(user.User.username == name)
-    if query:
+    try:
         # If User exists, abort! They can login.
+        query.get()
         return abort(403)
+    except user.User.DoesNotExist:
+        # User does not exist, continue...
+        pass
     password = request.form['password']
     # We create the user with a sesskey; a unique identifier that is used to identify the user
     # in the registration process from here on out
@@ -135,11 +141,12 @@ def register_fin():
             query.character = request.form['name']
             query.cclass = cclass.CharacterClass.get(cclass.CharacterClass.pid == request.form['cclass'])
             query.sesskey = str(uuid.uuid4())
+            query.initial()
             query.save()
 
             # Alright we're good! Let's login!
             session['userid'] = query.pid
-            session['sesskey'] = query.sesskey
+            session['sesskey'] = str(query.sesskey)
             return '', 200
         else:
             raise ValueError("Invalid Sesskey")
@@ -150,9 +157,10 @@ def register_fin():
 
 @app.route('/q/start')
 def start():
-    if not player().logs:
-        return jsonify(**element().json(player()))
-    return jsonify(**player().json_logs(element()))
+    p = player()
+    if not p.logs or p.logs.count() == 0:
+        return jsonify(**element().json(p))
+    return jsonify(**p.json_logs(element()))
 
 
 @app.route('/q/menu')
@@ -180,7 +188,6 @@ def act():
     if 'value' not in request.form or len(request.form['value']) == 0:
         return abort(401)
     action = request.form['value'].split("-")
-    print(action)
     p = player()
     if action[0] == 'r':
         result = element().respond(p, action[1])

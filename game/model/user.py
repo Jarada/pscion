@@ -8,7 +8,7 @@ This file is all about you. Yup! We store your username, password, and core char
 Over models, such as the Inventory and Companions, will reference what we have here.
 """
 
-from peewee import BooleanField, CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField
+from peewee import BooleanField, CharField, ForeignKeyField, IntegerField, PrimaryKeyField, TextField, SelectQuery
 from game.model import database, cclass, skill
 import hashlib
 
@@ -33,6 +33,17 @@ class User(database.BaseModel):
     gamestate = IntegerField(default=0)
     gameargs = TextField(null=True)
     location = CharField(default="home")
+
+    def initial(self):
+        skindex = 1  # Workaround for Peewee Issue #388 https://github.com/coleifer/peewee/issues/388
+        for sk in skill.Skill.select().order_by(skill.Skill.pid):
+            if sk.pid != skindex:
+                continue
+            if sk.pid == 1 or sk.pid == 2:
+                UserSkill.create(user=User.get(User.username == self.username), skill=sk, equipped=sk.pid)
+            else:
+                UserSkill.create(user=User.get(User.username == self.username), skill=sk)
+            skindex += 1
 
     def add_log(self, msgcmd):
         """
@@ -200,7 +211,9 @@ class User(database.BaseModel):
         :return: The item (if present), or None
         """
         index = (row * 11) + col
-        if len(olist) > index:
+        if isinstance(olist, list) and len(olist) > index:
+            return olist[index]
+        if isinstance(olist, SelectQuery) and olist.count() > index:
             return olist[index]
         return None
 
@@ -239,8 +252,12 @@ if not UserLog.table_exists():
     UserLog.create_table(fail_silently=True)
 if not UserSkill.table_exists():
     UserSkill.create_table(fail_silently=True)
-    for sk in skill.Skill.select():
+    index = 1  # Workaround for Peewee Issue #388 https://github.com/coleifer/peewee/issues/388
+    for sk in skill.Skill.select().order_by(skill.Skill.pid):
+        if sk.pid != index:
+            continue
         if sk.pid == 1 or sk.pid == 2:
             UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk, equipped=sk.pid)
         else:
             UserSkill.create(user=User.get(User.username == "Wuufu"), skill=sk)
+        index += 1

@@ -10,7 +10,10 @@ do in the game. After all, we gotta store it somewhere...
 
 from peewee import SqliteDatabase, Model
 
-conn = SqliteDatabase('pscion.db', threadlocals=True)
+db_locale = "/Users/Jarada/"
+# db_locale = ""
+db_name = "pscion.db"
+conn = SqliteDatabase('%s%s' % (db_locale, db_name))
 # import os
 # print(os.getcwd())
 
